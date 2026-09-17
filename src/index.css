@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #2563eb;
+  --color-brand-blue-light: #60a5fa;
+  --color-brand-black: #0a0a0a;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-brand-black);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.glow-blue {
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.08), 0 20px 40px -15px rgba(37, 99, 235, 0.35);
+}
+
+.glow-blue-hover:hover {
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15), 0 30px 60px -15px rgba(37, 99, 235, 0.5);
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+}
