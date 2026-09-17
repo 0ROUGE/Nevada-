@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import NotifyButton from './NotifyButton'
 
 const links = [
   { to: '/what-we-do', label: 'What We Do' },
@@ -39,13 +40,16 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="md:hidden p-2 rounded-lg hover:bg-black/5"
-          aria-label="Toggle menu"
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-1">
+          <NotifyButton />
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="md:hidden p-2 rounded-lg hover:bg-black/5"
+            aria-label="Toggle menu"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile collapsible menu */}

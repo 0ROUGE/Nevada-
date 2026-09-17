@@ -3,25 +3,36 @@ import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Writer } from '../lib/supabase'
+import { CardSkeleton } from '../components/PageSkeleton'
 
 export default function Writers() {
   const [writers, setWriters] = useState<Writer[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     supabase
       .from('writers')
       .select('*')
       .order('rating', { ascending: false })
-      .then(({ data }) => setWriters(data ?? []))
+      .then(({ data }) => {
+        setWriters(data ?? [])
+        setLoading(false)
+      })
   }, [])
 
   return (
     <section className="max-w-6xl mx-auto px-6 py-20">
       <h1 className="text-3xl font-extrabold mb-10 text-center">Favourite Writers</h1>
-      {writers.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      ) : writers.length === 0 ? (
         <p className="text-center text-black/40">No writers listed yet.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {writers.map((w, i) => (
             <motion.div
               key={w.id}

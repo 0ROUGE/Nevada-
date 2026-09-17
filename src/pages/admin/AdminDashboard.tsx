@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsIcon, LogOut, ShieldCheck } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsIcon, LogOut, ShieldCheck, Menu, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
 
@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [checking, setChecking] = useState(true)
   const [tab, setTab] = useState<Tab>('overview')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const [services, setServices] = useState<Service[]>([])
   const [writers, setWriters] = useState<Writer[]>([])
@@ -70,47 +71,91 @@ export default function AdminDashboard() {
     ...(isMaster ? [{ id: 'admins' as Tab, label: 'Admins', icon: <ShieldCheck size={18} /> }] : []),
   ]
 
+  function selectTab(t: Tab) {
+    setTab(t)
+    setSidebarOpen(false)
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white flex">
-      {/* Sidebar */}
-      <aside className="w-56 bg-black border-r border-white/10 flex flex-col p-4">
-        <h1 className="font-bold text-xl mb-8 px-2">
+    <div className="min-h-screen bg-black text-white flex w-full">
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-black border-b border-white/10 flex items-center justify-between px-4">
+        <h1 className="font-bold text-lg">
           Essay<span className="text-brand-blue-light">z</span>
         </h1>
-        <nav className="flex-1 space-y-1">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                tab === t.id ? 'bg-brand-blue text-white' : 'text-white/60 hover:bg-white/5'
-              }`}
-            >
-              {t.icon}
-              {t.label}
-              {t.id === 'reviews' && pending.length > 0 && (
-                <span className="ml-auto bg-red-500 text-xs rounded-full px-1.5">
-                  {pending.length}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:bg-white/5"
-        >
-          <LogOut size={18} /> Logout
+        <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+          <Menu size={22} />
         </button>
-      </aside>
+      </div>
+
+      {/* Sidebar: fixed drawer on mobile, static column on desktop */}
+      <AnimatePresence>
+        {(sidebarOpen || true) && (
+          <motion.aside
+            initial={false}
+            animate={{ x: sidebarOpen ? 0 : undefined }}
+            className={`fixed md:static top-0 left-0 z-50 h-full md:h-auto w-64 md:w-56 bg-black border-r border-white/10 flex flex-col p-4 transition-transform duration-300 md:translate-x-0 ${
+              sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-8 px-2">
+              <h1 className="font-bold text-xl">
+                Essay<span className="text-brand-blue-light">z</span>
+              </h1>
+              <button onClick={() => setSidebarOpen(false)} className="md:hidden" aria-label="Close menu">
+                <X size={20} />
+              </button>
+            </div>
+            <nav className="flex-1 space-y-1">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => selectTab(t.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    tab === t.id ? 'bg-brand-blue text-white' : 'text-white/60 hover:bg-white/5'
+                  }`}
+                >
+                  {t.icon}
+                  {t.label}
+                  {t.id === 'reviews' && pending.length > 0 && (
+                    <span className="ml-auto bg-red-500 text-xs rounded-full px-1.5">
+                      {pending.length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </nav>
+            <button
+              onClick={logout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:bg-white/5"
+            >
+              <LogOut size={18} /> Logout
+            </button>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Overlay behind mobile drawer */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Content */}
-      <main className="flex-1 bg-[#f5f7fb] text-black p-8 overflow-y-auto">
+      <main className="flex-1 w-full bg-[#f5f7fb] text-black p-4 sm:p-6 lg:p-8 pt-20 md:pt-8 overflow-y-auto overflow-x-hidden">
         <motion.div
           key={tab}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
+          className="max-w-6xl 2xl:max-w-7xl mx-auto"
         >
           {tab === 'overview' && (
             <Overview services={services} pending={pending} writers={writers} />
@@ -446,25 +491,84 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
   }
 
   return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Settings</h2>
+        <form onSubmit={save} className="glow-blue rounded-2xl bg-white p-6 space-y-4 max-w-xl">
+          <div>
+            <label className="block text-sm font-medium mb-1">WhatsApp Number (with country code, no + or spaces, e.g. 254712345678)</label>
+            <input value={form.whatsapp_number} onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">What We Do text</label>
+            <textarea value={form.what_we_do_text} onChange={(e) => setForm({ ...form, what_we_do_text: e.target.value })} rows={3} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">My Assignments text</label>
+            <textarea value={form.my_assignments_text} onChange={(e) => setForm({ ...form, my_assignments_text: e.target.value })} rows={3} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
+          </div>
+          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
+            Save Settings
+          </button>
+          {saved && <p className="text-green-600 text-sm">Saved!</p>}
+        </form>
+      </div>
+
+      <AnnouncementSender />
+    </div>
+  )
+}
+
+function AnnouncementSender() {
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault()
+    setStatus('sending')
+    const { error } = await supabase.functions.invoke('send-push', {
+      body: { title, body: body, url: '/' },
+    })
+    setStatus(error ? 'error' : 'sent')
+    if (!error) {
+      setTitle('')
+      setBody('')
+      setTimeout(() => setStatus('idle'), 2500)
+    }
+  }
+
+  return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Settings</h2>
-      <form onSubmit={save} className="glow-blue rounded-2xl bg-white p-6 space-y-4 max-w-xl">
-        <div>
-          <label className="block text-sm font-medium mb-1">WhatsApp Number (with country code, no + or spaces, e.g. 254712345678)</label>
-          <input value={form.whatsapp_number} onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">What We Do text</label>
-          <textarea value={form.what_we_do_text} onChange={(e) => setForm({ ...form, what_we_do_text: e.target.value })} rows={3} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">My Assignments text</label>
-          <textarea value={form.my_assignments_text} onChange={(e) => setForm({ ...form, my_assignments_text: e.target.value })} rows={3} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
-        </div>
-        <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
-          Save Settings
+      <h2 className="text-xl font-bold mb-1">Push Notification</h2>
+      <p className="text-sm text-black/50 mb-4">
+        Send a browser notification to everyone who's subscribed on the site.
+      </p>
+      <form onSubmit={send} className="glow-blue rounded-2xl bg-white p-6 space-y-4 max-w-xl">
+        <input
+          placeholder="Title (e.g. New service added!)"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full rounded-xl border border-black/10 px-4 py-2.5"
+        />
+        <textarea
+          placeholder="Message"
+          required
+          rows={2}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          className="w-full rounded-xl border border-black/10 px-4 py-2.5"
+        />
+        <button
+          type="submit"
+          disabled={status === 'sending'}
+          className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light disabled:opacity-60"
+        >
+          {status === 'sending' ? 'Sending…' : 'Send Notification'}
         </button>
-        {saved && <p className="text-green-600 text-sm">Saved!</p>}
+        {status === 'sent' && <p className="text-green-600 text-sm">Sent!</p>}
+        {status === 'error' && <p className="text-red-500 text-sm">Failed to send — check Edge Function is deployed with VAPID secrets set.</p>}
       </form>
     </div>
   )

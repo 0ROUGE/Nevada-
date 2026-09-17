@@ -5,9 +5,11 @@ import type { Service } from '../lib/supabase'
 export default function ServiceCard({
   service,
   whatsappNumber,
+  index = 0,
 }: {
   service: Service
   whatsappNumber: string
+  index?: number
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
@@ -36,14 +38,15 @@ export default function ServiceCard({
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.5, delay: Math.min(index * 0.06, 0.4) }}
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={resetTilt}
       style={{
         transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
       }}
-      className="tilt-card glow-blue glow-blue-hover rounded-2xl bg-white border border-black/5 p-6 flex flex-col justify-between cursor-pointer"
+      className="tilt-card glow-blue glow-blue-hover rounded-2xl bg-white border border-black/5 p-6 flex flex-col justify-between cursor-pointer w-full"
       onClick={orderViaWhatsApp}
     >
       {service.image_url && (
