@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsIcon, LogOut } from 'lucide-react'
+import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsIcon, LogOut, ShieldCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
 
-type Tab = 'overview' | 'services' | 'reviews' | 'writers' | 'settings'
+type Tab = 'overview' | 'services' | 'reviews' | 'writers' | 'settings' | 'admins'
+
+type Admin = { id: string; email: string; role: 'master' | 'admin'; created_at: string }
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -16,12 +18,16 @@ export default function AdminDashboard() {
   const [writers, setWriters] = useState<Writer[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
   const [settings, setSettings] = useState<SiteSettings | null>(null)
+  const [admins, setAdmins] = useState<Admin[]>([])
+  const [currentEmail, setCurrentEmail] = useState<string>('')
+  const [isMaster, setIsMaster] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
         navigate('/admin/login')
       } else {
+        setCurrentEmail(data.session.user.email ?? '')
         setChecking(false)
         loadAll()
       }
@@ -29,16 +35,21 @@ export default function AdminDashboard() {
   }, [])
 
   async function loadAll() {
-    const [s, w, r, st] = await Promise.all([
+    const [s, w, r, st, a] = await Promise.all([
       supabase.from('services').select('*').order('created_at', { ascending: false }),
       supabase.from('writers').select('*').order('created_at', { ascending: false }),
       supabase.from('reviews').select('*').order('created_at', { ascending: false }),
       supabase.from('site_settings').select('*').eq('id', 1).single(),
+      supabase.from('admins').select('*').order('created_at', { ascending: true }),
     ])
     setServices(s.data ?? [])
     setWriters(w.data ?? [])
     setReviews(r.data ?? [])
     setSettings(st.data ?? null)
+    setAdmins(a.data ?? [])
+    const { data: sessionData } = await supabase.auth.getSession()
+    const email = sessionData.session?.user.email
+    setIsMaster((a.data ?? []).some((row) => row.email === email && row.role === 'master'))
   }
 
   async function logout() {
@@ -56,6 +67,7 @@ export default function AdminDashboard() {
     { id: 'reviews', label: 'Reviews', icon: <MessageSquare size={18} /> },
     { id: 'writers', label: 'Writers', icon: <Users size={18} /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
+    ...(isMaster ? [{ id: 'admins' as Tab, label: 'Admins', icon: <ShieldCheck size={18} /> }] : []),
   ]
 
   return (
@@ -108,6 +120,9 @@ export default function AdminDashboard() {
           {tab === 'writers' && <WritersManager writers={writers} reload={loadAll} />}
           {tab === 'settings' && settings && (
             <SettingsManager settings={settings} reload={loadAll} />
+          )}
+          {tab === 'admins' && isMaster && (
+            <AdminsManager admins={admins} currentEmail={currentEmail} reload={loadAll} />
           )}
         </motion.div>
       </main>
@@ -307,6 +322,105 @@ function WritersManager({ writers, reload }: { writers: Writer[]; reload: () => 
             <div className="flex gap-2">
               <button onClick={() => edit(w)} className="text-sm text-brand-blue font-medium">Edit</button>
               <button onClick={() => remove(w.id)} className="text-sm text-red-500 font-medium">Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function AdminsManager({
+  admins,
+  currentEmail,
+  reload,
+}: {
+  admins: Admin[]
+  currentEmail: string
+  reload: () => void
+}) {
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState<'admin' | 'master'>('admin')
+  const [error, setError] = useState('')
+
+  async function addAdmin(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    const { error } = await supabase.from('admins').insert({ email: email.trim().toLowerCase(), role })
+    if (error) {
+      setError(error.message)
+    } else {
+      setEmail('')
+      setRole('admin')
+      reload()
+    }
+  }
+
+  async function removeAdmin(id: string, adminEmail: string) {
+    if (adminEmail === currentEmail) {
+      setError("You can't remove your own master account.")
+      return
+    }
+    await supabase.from('admins').delete().eq('id', id)
+    reload()
+  }
+
+  async function changeRole(id: string, newRole: 'admin' | 'master') {
+    await supabase.from('admins').update({ role: newRole }).eq('id', id)
+    reload()
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-2">Admins</h2>
+      <p className="text-sm text-black/50 mb-6">
+        As master admin, you control who else can manage Essayz. Note: adding someone here only
+        grants them dashboard access once they also have a Supabase Auth login for that email —
+        create their login in the Supabase dashboard first.
+      </p>
+
+      <form onSubmit={addAdmin} className="glow-blue rounded-2xl bg-white p-6 flex flex-col sm:flex-row gap-3 mb-8">
+        <input
+          type="email"
+          placeholder="new-admin@email.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex-1 rounded-xl border border-black/10 px-4 py-2.5"
+        />
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value as 'admin' | 'master')}
+          className="rounded-xl border border-black/10 px-4 py-2.5"
+        >
+          <option value="admin">Admin</option>
+          <option value="master">Master</option>
+        </select>
+        <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
+          Add Admin
+        </button>
+      </form>
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+      <div className="space-y-3">
+        {admins.map((a) => (
+          <div key={a.id} className="flex items-center justify-between bg-white rounded-xl border border-black/5 p-4">
+            <div>
+              <p className="font-semibold">{a.email}</p>
+              <p className="text-sm text-black/50 capitalize">{a.role}{a.email === currentEmail ? ' · you' : ''}</p>
+            </div>
+            <div className="flex gap-2 items-center">
+              <select
+                value={a.role}
+                onChange={(e) => changeRole(a.id, e.target.value as 'admin' | 'master')}
+                className="text-sm rounded-lg border border-black/10 px-2 py-1"
+              >
+                <option value="admin">Admin</option>
+                <option value="master">Master</option>
+              </select>
+              <button onClick={() => removeAdmin(a.id, a.email)} className="text-sm text-red-500 font-medium">
+                Remove
+              </button>
             </div>
           </div>
         ))}
