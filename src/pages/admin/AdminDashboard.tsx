@@ -81,7 +81,7 @@ export default function AdminDashboard() {
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-ink border-b border-white/10 flex items-center justify-between px-4">
         <h1 className="font-bold text-lg">
-          <span className="font-serif-display italic">Essayz</span>
+          <span className="font-serif-display font-semibold">Essayz</span>
         </h1>
         <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
           <Menu size={22} />
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
           >
             <div className="flex items-center justify-between mb-8 px-2">
               <h1 className="font-bold text-xl">
-                <span className="font-serif-display italic">Essayz</span>
+                <span className="font-serif-display font-semibold">Essayz</span>
               </h1>
               <button onClick={() => setSidebarOpen(false)} className="md:hidden" aria-label="Close menu">
                 <X size={20} />

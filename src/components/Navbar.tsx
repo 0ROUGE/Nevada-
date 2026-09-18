@@ -18,42 +18,46 @@ export default function Navbar() {
   const location = useLocation()
 
   return (
-    <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b hairline">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="font-serif-display text-2xl italic tracking-tight text-ink">
-          Essayz
-        </Link>
+    <>
+      <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b hairline">
+        <div className="max-w-[1200px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="font-serif-display text-2xl font-semibold tracking-tight text-ink">
+            Essayz
+          </Link>
 
-        {/* Desktop links */}
-        <nav className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                `text-[13px] font-medium tracking-wide transition-colors ${
-                  isActive ? 'text-brand-blue' : 'text-ink/60 hover:text-ink'
-                }`
-              }
+          {/* Desktop links */}
+          <nav className="hidden md:flex items-center gap-8">
+            {links.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                className={({ isActive }) =>
+                  `text-[13px] font-medium tracking-wide transition-colors ${
+                    isActive ? 'text-brand-blue' : 'text-ink/60 hover:text-ink'
+                  }`
+                }
+              >
+                {l.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-1">
+            <NotifyButton />
+            <button
+              onClick={() => setOpen(true)}
+              className="md:hidden p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
+              aria-label="Open menu"
             >
-              {l.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-1">
-          <NotifyButton />
-          <button
-            onClick={() => setOpen(true)}
-            className="md:hidden p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu size={22} strokeWidth={1.75} />
-          </button>
+              <Menu size={22} strokeWidth={1.75} />
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Full-panel mobile menu */}
+      {/* Full-panel mobile menu — rendered as a sibling of <header>, not a child.
+          A backdrop-filter ancestor (header uses backdrop-blur) creates a containing
+          block for position:fixed descendants, which breaks full-viewport sizing. */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -61,10 +65,10 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[60] bg-paper md:hidden"
+            className="fixed inset-0 z-[100] bg-paper md:hidden overflow-y-auto"
           >
             <div className="flex items-center justify-between px-5 h-16 border-b hairline">
-              <span className="font-serif-display text-2xl italic text-ink">Essayz</span>
+              <span className="font-serif-display text-2xl font-semibold text-ink">Essayz</span>
               <button
                 onClick={() => setOpen(false)}
                 className="p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
@@ -111,6 +115,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   )
 }
