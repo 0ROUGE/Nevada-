@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { ArrowUpRight } from 'lucide-react'
 import type { Service } from '../lib/supabase'
 
 export default function ServiceCard({
@@ -11,68 +11,51 @@ export default function ServiceCard({
   whatsappNumber: string
   index?: number
 }) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
-
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const card = cardRef.current
-    if (!card) return
-    const rect = card.getBoundingClientRect()
-    const x = (e.clientY - rect.top - rect.height / 2) / 12
-    const y = (e.clientX - rect.left - rect.width / 2) / -12
-    setTilt({ x, y })
-  }
-
-  function resetTilt() {
-    setTilt({ x: 0, y: 0 })
-  }
-
   function orderViaWhatsApp() {
     const message = `Hi! I'd like to order the "${service.title}" service.`
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
-    window.open(url, '_blank')
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.5, delay: Math.min(index * 0.06, 0.4) }}
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={resetTilt}
-      style={{
-        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-      }}
-      className="tilt-card glow-blue glow-blue-hover rounded-2xl bg-white border border-black/5 p-6 flex flex-col justify-between cursor-pointer w-full"
-      onClick={orderViaWhatsApp}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.35) }}
+      className="card-lift rounded-xl bg-white border hairline p-6 flex flex-col justify-between w-full"
     >
       {service.image_url && (
         <img
           src={service.image_url}
-          alt={service.title}
-          className="w-full h-36 object-cover rounded-xl mb-4"
+          alt=""
+          className="w-full h-36 object-cover rounded-lg mb-4"
         />
       )}
       <div>
         {service.category && (
-          <span className="inline-block text-xs font-semibold text-brand-blue bg-brand-blue/10 px-2.5 py-1 rounded-full mb-3">
-            {service.category}
-          </span>
+          <p className="eyebrow mb-3">{service.category}</p>
         )}
-        <h3 className="font-bold text-lg mb-1">{service.title}</h3>
-        <p className="text-sm text-black/60 line-clamp-3">{service.description}</p>
+        <h3 className="font-serif-display text-xl text-ink mb-2">{service.title}</h3>
+        <p className="text-[14px] text-ink-muted leading-relaxed line-clamp-3">
+          {service.description}
+        </p>
       </div>
-      <div className="flex items-center justify-between mt-5">
-        {service.price_range && (
-          <span className="font-semibold text-brand-blue">{service.price_range}</span>
+      <div className="flex items-center justify-between mt-6 pt-4 border-t hairline">
+        {service.price_range ? (
+          <span className="text-sm font-semibold text-ink">{service.price_range}</span>
+        ) : (
+          <span />
         )}
-        <span className="text-sm font-medium bg-brand-blue text-white px-4 py-2 rounded-full hover:bg-brand-blue-light transition-colors">
+        <button
+          type="button"
+          onClick={orderViaWhatsApp}
+          className="inline-flex items-center gap-1 text-sm font-semibold text-brand-blue hover:gap-2 transition-all active:scale-[0.97]"
+        >
           Order via WhatsApp
-        </span>
+          <ArrowUpRight size={15} />
+        </button>
       </div>
-    </motion.div>
+    </motion.article>
   )
 }

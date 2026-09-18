@@ -77,11 +77,11 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex w-full">
+    <div className="min-h-screen bg-ink text-white flex w-full">
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-black border-b border-white/10 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-ink border-b border-white/10 flex items-center justify-between px-4">
         <h1 className="font-bold text-lg">
-          Essay<span className="text-brand-blue-light">z</span>
+          <span className="font-serif-display italic">Essayz</span>
         </h1>
         <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
           <Menu size={22} />
@@ -94,13 +94,13 @@ export default function AdminDashboard() {
           <motion.aside
             initial={false}
             animate={{ x: sidebarOpen ? 0 : undefined }}
-            className={`fixed md:static top-0 left-0 z-50 h-full md:h-auto w-64 md:w-56 bg-black border-r border-white/10 flex flex-col p-4 transition-transform duration-300 md:translate-x-0 ${
+            className={`fixed md:static top-0 left-0 z-50 h-full md:h-auto w-64 md:w-56 bg-ink border-r border-white/10 flex flex-col p-4 transition-transform duration-300 md:translate-x-0 ${
               sidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
             <div className="flex items-center justify-between mb-8 px-2">
               <h1 className="font-bold text-xl">
-                Essay<span className="text-brand-blue-light">z</span>
+                <span className="font-serif-display italic">Essayz</span>
               </h1>
               <button onClick={() => setSidebarOpen(false)} className="md:hidden" aria-label="Close menu">
                 <X size={20} />
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="glow-blue rounded-2xl bg-white p-6">
+    <div className="rounded-xl border hairline bg-white p-6">
       <p className="text-sm text-black/50">{label}</p>
       <p className="text-3xl font-extrabold text-brand-blue mt-1">{value}</p>
     </div>
@@ -241,18 +241,18 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Services</h2>
-      <form onSubmit={save} className="glow-blue rounded-2xl bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <form onSubmit={save} className="rounded-xl border hairline bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <input placeholder="Title" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Price Range (e.g. KES 500 - 2000)" value={form.price_range} onChange={(e) => setForm({ ...form, price_range: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5 sm:col-span-2" rows={3} />
         <div className="sm:col-span-2 flex gap-2">
-          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
+          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
             {editingId ? 'Update Service' : 'Add Service'}
           </button>
           {editingId && (
-            <button type="button" onClick={() => { setEditingId(null); setForm(empty) }} className="px-6 py-2.5 rounded-full border border-black/10">
+            <button type="button" onClick={() => { setEditingId(null); setForm(empty) }} className="px-6 py-2.5 rounded-lg border hairline">
               Cancel
             </button>
           )}
@@ -339,18 +339,18 @@ function WritersManager({ writers, reload }: { writers: Writer[]; reload: () => 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Writers</h2>
-      <form onSubmit={save} className="glow-blue rounded-2xl bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <form onSubmit={save} className="rounded-xl border hairline bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <input placeholder="Name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Specialty" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input type="number" min={1} max={5} step={0.1} placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Avatar URL" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5 sm:col-span-2" rows={3} />
         <div className="sm:col-span-2 flex gap-2">
-          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
+          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
             {editingId ? 'Update Writer' : 'Add Writer'}
           </button>
           {editingId && (
-            <button type="button" onClick={() => { setEditingId(null); setForm(empty) }} className="px-6 py-2.5 rounded-full border border-black/10">
+            <button type="button" onClick={() => { setEditingId(null); setForm(empty) }} className="px-6 py-2.5 rounded-lg border hairline">
               Cancel
             </button>
           )}
@@ -424,7 +424,7 @@ function AdminsManager({
         create their login in the Supabase dashboard first.
       </p>
 
-      <form onSubmit={addAdmin} className="glow-blue rounded-2xl bg-white p-6 flex flex-col sm:flex-row gap-3 mb-8">
+      <form onSubmit={addAdmin} className="rounded-xl border hairline bg-white p-6 flex flex-col sm:flex-row gap-3 mb-8">
         <input
           type="email"
           placeholder="new-admin@email.com"
@@ -441,7 +441,7 @@ function AdminsManager({
           <option value="admin">Admin</option>
           <option value="master">Master</option>
         </select>
-        <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
+        <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
           Add Admin
         </button>
       </form>
@@ -494,7 +494,7 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold mb-6">Settings</h2>
-        <form onSubmit={save} className="glow-blue rounded-2xl bg-white p-6 space-y-4 max-w-xl">
+        <form onSubmit={save} className="rounded-xl border hairline bg-white p-6 space-y-4 max-w-xl">
           <div>
             <label className="block text-sm font-medium mb-1">WhatsApp Number (with country code, no + or spaces, e.g. 254712345678)</label>
             <input value={form.whatsapp_number} onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
@@ -507,7 +507,7 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
             <label className="block text-sm font-medium mb-1">My Assignments text</label>
             <textarea value={form.my_assignments_text} onChange={(e) => setForm({ ...form, my_assignments_text: e.target.value })} rows={3} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
           </div>
-          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light">
+          <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
             Save Settings
           </button>
           {saved && <p className="text-green-600 text-sm">Saved!</p>}
@@ -544,7 +544,7 @@ function AnnouncementSender() {
       <p className="text-sm text-black/50 mb-4">
         Send a browser notification to everyone who's subscribed on the site.
       </p>
-      <form onSubmit={send} className="glow-blue rounded-2xl bg-white p-6 space-y-4 max-w-xl">
+      <form onSubmit={send} className="rounded-xl border hairline bg-white p-6 space-y-4 max-w-xl">
         <input
           placeholder="Title (e.g. New service added!)"
           required
@@ -563,7 +563,7 @@ function AnnouncementSender() {
         <button
           type="submit"
           disabled={status === 'sending'}
-          className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-brand-blue-light disabled:opacity-60"
+          className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light disabled:opacity-60"
         >
           {status === 'sending' ? 'Sending…' : 'Send Notification'}
         </button>

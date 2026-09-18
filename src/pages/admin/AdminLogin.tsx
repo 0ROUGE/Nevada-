@@ -32,55 +32,58 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black px-6">
+    <div className="min-h-screen flex items-center justify-center bg-ink px-6">
       <motion.form
         onSubmit={login}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm glow-blue rounded-2xl bg-white p-8 space-y-4"
+        className="w-full max-w-sm rounded-xl bg-white p-8 sm:p-10 space-y-5"
       >
-        <h1 className="text-2xl font-extrabold text-center mb-2">
-          Essay<span className="text-brand-blue">z</span> Admin
-        </h1>
+        <div className="text-center mb-2">
+          <p className="font-serif-display text-3xl italic text-ink">Essayz</p>
+          <p className="text-xs uppercase tracking-widest text-ink-muted mt-1">Admin</p>
+        </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
+          <label htmlFor="admin-email" className="block text-sm font-semibold text-ink mb-1.5">Email</label>
           <input
+            id="admin-email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-black/10 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            className="w-full rounded-lg border hairline px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue transition-shadow"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
+          <label htmlFor="admin-password" className="block text-sm font-semibold text-ink mb-1.5">Password</label>
           <input
+            id="admin-password"
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-black/10 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            className="w-full rounded-lg border hairline px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue transition-shadow"
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm" role="alert">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-brand-blue text-white font-medium py-3 rounded-full hover:bg-brand-blue-light transition-colors disabled:opacity-60"
+          className="w-full bg-brand-blue text-white text-sm font-semibold py-3 rounded-lg hover:bg-brand-blue-light transition-all active:scale-[0.98] disabled:opacity-60"
         >
           {loading ? 'Signing in…' : 'Sign In'}
         </button>
 
         <div className="flex items-center gap-3 py-1">
-          <div className="h-px flex-1 bg-black/10" />
-          <span className="text-xs text-black/40">OR</span>
-          <div className="h-px flex-1 bg-black/10" />
+          <div className="h-px flex-1 bg-hairline" />
+          <span className="text-xs text-ink-muted">OR</span>
+          <div className="h-px flex-1 bg-hairline" />
         </div>
 
         <button
           type="button"
           onClick={loginWithGoogle}
-          className="w-full flex items-center justify-center gap-2 border border-black/10 py-3 rounded-full font-medium hover:bg-black/5 transition-colors"
+          className="w-full flex items-center justify-center gap-2 border hairline py-3 rounded-lg text-sm font-semibold hover:bg-black/[0.03] transition-colors"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62Z" />

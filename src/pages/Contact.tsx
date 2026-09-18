@@ -16,22 +16,23 @@ export default function Contact() {
   }, [])
 
   return (
-    <section className="max-w-xl mx-auto px-6 py-24 text-center">
+    <section className="max-w-[640px] mx-auto px-5 sm:px-8 py-20 sm:py-24 text-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="glow-blue rounded-2xl bg-white border border-black/5 p-10"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-xl bg-brand-blue-tint border hairline p-10 sm:p-14"
       >
-        <MessageCircle className="mx-auto mb-4 text-brand-blue" size={40} />
-        <h1 className="text-2xl font-extrabold mb-2">Contact Seller</h1>
-        <p className="text-black/60 mb-6">
-          Have a question or a custom request? Message us directly on WhatsApp.
+        <MessageCircle className="mx-auto mb-5 text-brand-blue" size={32} strokeWidth={1.5} />
+        <p className="eyebrow mb-3">Have a question?</p>
+        <h1 className="font-serif-display text-3xl text-ink mb-3">Contact Seller</h1>
+        <p className="text-ink-muted mb-8 max-w-sm mx-auto">
+          Need a custom request or want to discuss your next project? Get in touch directly.
         </p>
         <a
           href={`https://wa.me/${number}`}
           target="_blank"
           rel="noreferrer"
-          className="inline-block bg-brand-blue text-white font-medium px-8 py-3 rounded-full hover:bg-brand-blue-light transition-colors"
+          className="inline-flex items-center gap-2 bg-brand-blue text-white text-sm font-semibold px-7 py-3 rounded-lg hover:bg-brand-blue-light transition-all active:scale-[0.97]"
         >
           Chat on WhatsApp
         </a>

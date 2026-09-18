@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import NotifyButton from './NotifyButton'
 
 const links = [
@@ -15,23 +15,24 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const location = useLocation()
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="font-bold text-xl tracking-tight">
-          Essay<span className="text-brand-blue">z</span>
+    <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b hairline">
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+        <Link to="/" className="font-serif-display text-2xl italic tracking-tight text-ink">
+          Essayz
         </Link>
 
         {/* Desktop links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           {links.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors ${
-                  isActive ? 'text-brand-blue' : 'text-black/70 hover:text-brand-blue'
+                `text-[13px] font-medium tracking-wide transition-colors ${
+                  isActive ? 'text-brand-blue' : 'text-ink/60 hover:text-ink'
                 }`
               }
             >
@@ -43,42 +44,71 @@ export default function Navbar() {
         <div className="flex items-center gap-1">
           <NotifyButton />
           <button
-            onClick={() => setOpen((o) => !o)}
-            className="md:hidden p-2 rounded-lg hover:bg-black/5"
-            aria-label="Toggle menu"
+            onClick={() => setOpen(true)}
+            className="md:hidden p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
+            aria-label="Open menu"
           >
-            {open ? <X size={22} /> : <Menu size={22} />}
+            <Menu size={22} strokeWidth={1.75} />
           </button>
         </div>
       </div>
 
-      {/* Mobile collapsible menu */}
-      <AnimatePresence initial={false}>
+      {/* Full-panel mobile menu */}
+      <AnimatePresence>
         {open && (
-          <motion.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden border-t border-black/5 bg-white"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] bg-paper md:hidden"
           >
-            <div className="flex flex-col px-4 py-2">
-              {links.map((l) => (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    `py-3 text-sm font-medium border-b border-black/5 last:border-0 ${
-                      isActive ? 'text-brand-blue' : 'text-black/70'
-                    }`
-                  }
-                >
-                  {l.label}
-                </NavLink>
-              ))}
+            <div className="flex items-center justify-between px-5 h-16 border-b hairline">
+              <span className="font-serif-display text-2xl italic text-ink">Essayz</span>
+              <button
+                onClick={() => setOpen(false)}
+                className="p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
+                aria-label="Close menu"
+              >
+                <X size={22} strokeWidth={1.75} />
+              </button>
             </div>
-          </motion.nav>
+
+            <nav className="px-5 pt-4">
+              {links.map((l, i) => {
+                const isActive = location.pathname === l.to
+                return (
+                  <motion.div
+                    key={l.to}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.25, delay: i * 0.04, ease: 'easeOut' }}
+                    className="border-b hairline"
+                  >
+                    <NavLink
+                      to={l.to}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center justify-between py-4 group"
+                    >
+                      <span
+                        className={`text-lg font-medium ${
+                          isActive ? 'text-brand-blue' : 'text-ink'
+                        }`}
+                      >
+                        {l.label}
+                      </span>
+                      <ArrowRight
+                        size={18}
+                        className={`transition-transform group-hover:translate-x-1 ${
+                          isActive ? 'text-brand-blue' : 'text-ink/30'
+                        }`}
+                      />
+                    </NavLink>
+                  </motion.div>
+                )
+              })}
+            </nav>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>

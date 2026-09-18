@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
 import PageSkeleton from './components/PageSkeleton'
 
@@ -21,9 +22,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main className="flex-1 w-full">{children}</main>
       <FloatingWhatsApp />
-      <footer className="text-center text-sm text-black/40 py-8 border-t border-black/5">
-        © {new Date().getFullYear()} Essayz. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   )
 }

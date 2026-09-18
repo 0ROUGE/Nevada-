@@ -15,11 +15,12 @@ export default function WhatWeDo() {
   }, [])
 
   return (
-    <section className="max-w-3xl mx-auto px-6 py-20">
+    <section className="max-w-[720px] mx-auto px-5 sm:px-8 py-20 sm:py-24">
+      <p className="eyebrow mb-3">Essayz</p>
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl font-extrabold mb-6"
+        className="font-serif-display text-4xl text-ink mb-6"
       >
         What We Do
       </motion.h1>
@@ -27,7 +28,7 @@ export default function WhatWeDo() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-black/70 leading-relaxed text-lg"
+        className="text-ink-muted leading-relaxed text-lg"
       >
         {text}
       </motion.p>

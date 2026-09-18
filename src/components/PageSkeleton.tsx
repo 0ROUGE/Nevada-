@@ -13,8 +13,8 @@ export function PageSkeleton() {
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-2xl border border-black/5 p-6 animate-pulse">
-      <div className="w-full h-36 bg-black/5 rounded-xl mb-4" />
+    <div className="rounded-xl border hairline p-6 animate-pulse">
+      <div className="w-full h-36 bg-black/5 rounded-lg mb-4" />
       <div className="h-4 w-20 bg-black/5 rounded-full mb-3" />
       <div className="h-5 w-3/4 bg-black/10 rounded mb-2" />
       <div className="h-3 w-full bg-black/5 rounded mb-1" />

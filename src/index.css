@@ -1,10 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
+  /* Editorial color system */
+  --color-ink: #111111;
+  --color-ink-muted: #6b7280;
+  --color-hairline: #e5e7eb;
+  --color-paper: #fefefe;
   --color-brand-blue: #2563eb;
   --color-brand-blue-light: #60a5fa;
-  --color-brand-black: #0a0a0a;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-blue-tint: #eff4ff;
+  --color-brand-black: #111111;
+
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
 }
 
 html {
@@ -12,21 +21,50 @@ html {
 }
 
 body {
-  background: #ffffff;
-  color: var(--color-brand-black);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.glow-blue {
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.08), 0 20px 40px -15px rgba(37, 99, 235, 0.35);
+.font-serif-display {
+  font-family: var(--font-serif);
 }
 
-.glow-blue-hover:hover {
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15), 0 30px 60px -15px rgba(37, 99, 235, 0.5);
+/* Subtle elevation, used sparingly — replaces the old heavy blue glow */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -12px rgba(17, 17, 17, 0.12);
+  border-color: #d1d5db;
 }
 
 .tilt-card {
-  transform-style: preserve-3d;
-  transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+  transition: transform 0.15s ease-out, box-shadow 0.2s ease;
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-brand-blue);
+}
+
+.hairline {
+  border-color: var(--color-hairline);
+}
+
+/* Respect reduced-motion preference site-wide */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
