@@ -5,6 +5,7 @@ import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsI
 import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
 import ImageUpload from '../../components/ImageUpload'
+import KenyaPhoneInput from '../../components/KenyaPhoneInput'
 
 type Tab = 'overview' | 'services' | 'reviews' | 'writers' | 'settings' | 'admins'
 
@@ -81,7 +82,8 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-ink text-white flex w-full">
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-ink border-b border-white/10 flex items-center justify-between px-4">
-        <h1 className="font-bold text-lg">
+        <h1 className="font-bold text-lg flex items-center gap-2">
+          <img src="/favicon.svg" alt="" className="w-6 h-6 rounded" />
           <span className="font-serif-display font-semibold">Essayz</span>
         </h1>
         <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
@@ -100,7 +102,8 @@ export default function AdminDashboard() {
             }`}
           >
             <div className="flex items-center justify-between mb-8 px-2">
-              <h1 className="font-bold text-xl">
+              <h1 className="font-bold text-xl flex items-center gap-2">
+                <img src="/favicon.svg" alt="" className="w-7 h-7 rounded-md" />
                 <span className="font-serif-display font-semibold">Essayz</span>
               </h1>
               <button onClick={() => setSidebarOpen(false)} className="md:hidden" aria-label="Close menu">
@@ -210,6 +213,7 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
   const empty = { title: '', description: '', price_range: '', category: '', image_url: '' }
   const [form, setForm] = useState(empty)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
@@ -262,12 +266,24 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
 
       <div className="space-y-3">
         {services.map((s) => (
-          <div key={s.id} className="flex items-center justify-between bg-white rounded-xl border border-black/5 p-4">
+          <div key={s.id} className="flex items-center justify-between bg-white rounded-2xl border border-black/5 p-4">
             <div>
               <p className="font-semibold">{s.title}</p>
               <p className="text-sm text-black/50">{s.category} · {s.price_range}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3 items-center">
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/?service=${s.id}`
+                  navigator.clipboard.writeText(url)
+                  setCopiedId(s.id)
+                  setTimeout(() => setCopiedId(null), 1500)
+                }}
+                className="text-sm text-ink-muted hover:text-brand-blue font-medium"
+                title="Copy a direct link to this service"
+              >
+                {copiedId === s.id ? 'Copied!' : 'Share'}
+              </button>
               <button onClick={() => edit(s)} className="text-sm text-brand-blue font-medium">Edit</button>
               <button onClick={() => remove(s.id)} className="text-sm text-red-500 font-medium">Delete</button>
             </div>
@@ -478,6 +494,7 @@ function AdminsManager({
 function SettingsManager({ settings, reload }: { settings: SiteSettings; reload: () => void }) {
   const [form, setForm] = useState({
     whatsapp_number: settings.whatsapp_number ?? '',
+    whatsapp_business_number: settings.whatsapp_business_number ?? '',
     what_we_do_text: settings.what_we_do_text ?? '',
     my_assignments_text: settings.my_assignments_text ?? '',
   })
@@ -496,10 +513,16 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
       <div>
         <h2 className="text-2xl font-bold mb-6">Settings</h2>
         <form onSubmit={save} className="rounded-xl border hairline bg-white p-6 space-y-4 max-w-xl">
-          <div>
-            <label className="block text-sm font-medium mb-1">WhatsApp Number (with country code, no + or spaces, e.g. 254712345678)</label>
-            <input value={form.whatsapp_number} onChange={(e) => setForm({ ...form, whatsapp_number: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />
-          </div>
+          <KenyaPhoneInput
+            label="WhatsApp Number (Personal) — used for ordering services"
+            value={form.whatsapp_number}
+            onChange={(v) => setForm({ ...form, whatsapp_number: v })}
+          />
+          <KenyaPhoneInput
+            label="WhatsApp Business Number (optional)"
+            value={form.whatsapp_business_number}
+            onChange={(v) => setForm({ ...form, whatsapp_business_number: v })}
+          />
           <div>
             <label className="block text-sm font-medium mb-1">What We Do text</label>
             <textarea value={form.what_we_do_text} onChange={(e) => setForm({ ...form, what_we_do_text: e.target.value })} rows={3} className="w-full rounded-xl border border-black/10 px-4 py-2.5" />

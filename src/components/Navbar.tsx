@@ -22,7 +22,8 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b hairline">
         <div className="max-w-[1200px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="font-serif-display text-2xl font-semibold tracking-tight text-ink">
+          <Link to="/" className="flex items-center gap-2 font-serif-display text-2xl font-semibold tracking-tight text-ink">
+            <img src="/favicon.svg" alt="" className="w-7 h-7 rounded-md" />
             Essayz
           </Link>
 
@@ -79,7 +80,10 @@ export default function Navbar() {
             className="fixed inset-0 z-[100] bg-paper md:hidden overflow-y-auto"
           >
             <div className="flex items-center justify-between px-5 h-16 border-b hairline">
-              <span className="font-serif-display text-2xl font-semibold text-ink">Essayz</span>
+              <span className="flex items-center gap-2 font-serif-display text-2xl font-semibold text-ink">
+                <img src="/favicon.svg" alt="" className="w-7 h-7 rounded-md" />
+                Essayz
+              </span>
               <div className="flex items-center gap-1">
                 <ThemeToggle />
                 <button

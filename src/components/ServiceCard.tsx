@@ -9,11 +9,13 @@ export default function ServiceCard({
   whatsappNumber,
   index = 0,
   onOrdered,
+  highlighted = false,
 }: {
   service: Service
   whatsappNumber: string
   index?: number
   onOrdered?: () => void
+  highlighted?: boolean
 }) {
   async function orderViaWhatsApp() {
     // Best-effort order record — never blocks the WhatsApp handoff if it fails
@@ -38,11 +40,14 @@ export default function ServiceCard({
 
   return (
     <motion.article
+      id={`service-${service.id}`}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.35) }}
-      className="card-lift rounded-xl bg-surface border hairline p-6 flex flex-col justify-between w-full"
+      className={`card-lift rounded-2xl bg-surface border p-6 flex flex-col justify-between w-full ${
+        highlighted ? 'border-brand-blue ring-2 ring-brand-blue/40' : 'hairline'
+      }`}
     >
       {service.image_url && (
         <img

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import type { Service, SiteSettings } from '../lib/supabase'
@@ -12,6 +12,8 @@ export default function Home() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [showReviewPrompt, setShowReviewPrompt] = useState(false)
+  const [searchParams] = useSearchParams()
+  const highlightId = searchParams.get('service')
 
   useEffect(() => {
     async function load() {
@@ -25,6 +27,14 @@ export default function Home() {
     }
     load()
   }, [])
+
+  useEffect(() => {
+    if (!highlightId || loading) return
+    const el = document.getElementById(`service-${highlightId}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [highlightId, loading])
 
   return (
     <div>
@@ -107,6 +117,7 @@ export default function Home() {
                 whatsappNumber={settings?.whatsapp_number || ''}
                 index={i}
                 onOrdered={() => setShowReviewPrompt(true)}
+                highlighted={highlightId === s.id}
               />
             ))}
           </div>

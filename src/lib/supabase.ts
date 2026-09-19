@@ -47,6 +47,7 @@ export type Review = {
 export type SiteSettings = {
   id: number
   whatsapp_number: string | null
+  whatsapp_business_number: string | null
   what_we_do_text: string | null
   my_assignments_text: string | null
 }

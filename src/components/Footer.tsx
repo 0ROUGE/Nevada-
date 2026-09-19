@@ -16,7 +16,10 @@ export default function Footer() {
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8 py-12">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
           <div className="max-w-xs">
-            <p className="font-serif-display text-2xl font-semibold text-ink mb-2">Essayz</p>
+            <p className="flex items-center gap-2 font-serif-display text-2xl font-semibold text-ink mb-2">
+              <img src="/favicon.svg" alt="" className="w-6 h-6 rounded" />
+              Essayz
+            </p>
             <p className="text-sm text-ink-muted leading-relaxed">
               Thoughtful writing and assignment support, delivered with clarity and care.
             </p>

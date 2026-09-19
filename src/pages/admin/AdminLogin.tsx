@@ -40,6 +40,7 @@ export default function AdminLogin() {
         className="w-full max-w-sm rounded-xl bg-white p-8 sm:p-10 space-y-5"
       >
         <div className="text-center mb-2">
+          <img src="/favicon.svg" alt="" className="w-10 h-10 rounded-lg mx-auto mb-2" />
           <p className="font-serif-display text-3xl font-semibold text-ink">Essayz</p>
           <p className="text-xs uppercase tracking-widest text-ink-muted mt-1">Admin</p>
         </div>
