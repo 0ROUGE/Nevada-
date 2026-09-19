@@ -1,20 +1,39 @@
 import { motion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { getSessionId } from '../lib/session'
 import type { Service } from '../lib/supabase'
 
 export default function ServiceCard({
   service,
   whatsappNumber,
   index = 0,
+  onOrdered,
 }: {
   service: Service
   whatsappNumber: string
   index?: number
+  onOrdered?: () => void
 }) {
-  function orderViaWhatsApp() {
+  async function orderViaWhatsApp() {
+    // Best-effort order record — never blocks the WhatsApp handoff if it fails
+    supabase
+      .from('customer_orders')
+      .insert({
+        session_id: getSessionId(),
+        service_id: service.id,
+        service_title: service.title,
+      })
+      .then(() => {})
+
+    localStorage.setItem('essayz_has_ordered', 'true')
+    sessionStorage.setItem('essayz_just_ordered_this_visit', 'true')
+
     const message = `Hi! I'd like to order the "${service.title}" service.`
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
     window.open(url, '_blank', 'noopener,noreferrer')
+
+    onOrdered?.()
   }
 
   return (

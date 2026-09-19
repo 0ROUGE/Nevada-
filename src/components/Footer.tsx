@@ -7,6 +7,7 @@ const links = [
   { to: '/testimonials', label: 'Testimonials' },
   { to: '/reviews', label: 'Leave a Review' },
   { to: '/contact', label: 'Contact' },
+  { to: '/account', label: 'My Account' },
 ]
 
 export default function Footer() {

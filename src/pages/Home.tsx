@@ -5,11 +5,13 @@ import { supabase } from '../lib/supabase'
 import type { Service, SiteSettings } from '../lib/supabase'
 import ServiceCard from '../components/ServiceCard'
 import { CardSkeleton } from '../components/PageSkeleton'
+import ReviewPromptModal from '../components/ReviewPromptModal'
 
 export default function Home() {
   const [services, setServices] = useState<Service[]>([])
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showReviewPrompt, setShowReviewPrompt] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -104,11 +106,14 @@ export default function Home() {
                 service={s}
                 whatsappNumber={settings?.whatsapp_number || ''}
                 index={i}
+                onOrdered={() => setShowReviewPrompt(true)}
               />
             ))}
           </div>
         )}
       </section>
+
+      <ReviewPromptModal open={showReviewPrompt} onClose={() => setShowReviewPrompt(false)} />
     </div>
   )
 }

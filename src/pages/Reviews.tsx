@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getSessionId } from '../lib/session'
 
 export default function Reviews() {
   const [name, setName] = useState('')
@@ -12,9 +13,15 @@ export default function Reviews() {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('sending')
-    const { error } = await supabase
-      .from('reviews')
-      .insert({ name, rating, comment, status: 'pending' })
+    const { data: sessionData } = await supabase.auth.getSession()
+    const { error } = await supabase.from('reviews').insert({
+      name,
+      rating,
+      comment,
+      status: 'pending',
+      session_id: getSessionId(),
+      user_id: sessionData.session?.user.id ?? null,
+    })
     setStatus(error ? 'error' : 'sent')
     if (!error) {
       setName('')

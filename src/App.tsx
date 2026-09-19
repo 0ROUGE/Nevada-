@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
 import PageSkeleton from './components/PageSkeleton'
+import SignupPromptModal from './components/SignupPromptModal'
 
 const Home = lazy(() => import('./pages/Home'))
 const WhatWeDo = lazy(() => import('./pages/WhatWeDo'))
@@ -13,6 +14,8 @@ const Writers = lazy(() => import('./pages/Writers'))
 const Reviews = lazy(() => import('./pages/Reviews'))
 const Testimonials = lazy(() => import('./pages/Testimonials'))
 const Contact = lazy(() => import('./pages/Contact'))
+const Account = lazy(() => import('./pages/Account'))
+const AccountLogin = lazy(() => import('./pages/AccountLogin'))
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 
@@ -23,6 +26,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 w-full">{children}</main>
       <FloatingWhatsApp />
       <Footer />
+      <SignupPromptModal />
     </div>
   )
 }
@@ -41,6 +45,8 @@ export default function App() {
           <Route path="/reviews" element={<PublicLayout><Reviews /></PublicLayout>} />
           <Route path="/testimonials" element={<PublicLayout><Testimonials /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+          <Route path="/account" element={<PublicLayout><Account /></PublicLayout>} />
+          <Route path="/account/login" element={<PublicLayout><AccountLogin /></PublicLayout>} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
