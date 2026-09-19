@@ -23,7 +23,7 @@ export default function ServiceCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.35) }}
-      className="card-lift rounded-xl bg-white border hairline p-6 flex flex-col justify-between w-full"
+      className="card-lift rounded-xl bg-surface border hairline p-6 flex flex-col justify-between w-full"
     >
       {service.image_url && (
         <img

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsIcon, LogOut, ShieldCheck, Menu, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
+import ImageUpload from '../../components/ImageUpload'
 
 type Tab = 'overview' | 'services' | 'reviews' | 'writers' | 'settings' | 'admins'
 
@@ -245,7 +246,7 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
         <input placeholder="Title" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Price Range (e.g. KES 500 - 2000)" value={form.price_range} onChange={(e) => setForm({ ...form, price_range: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
-        <input placeholder="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
+        <ImageUpload value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} folder="services" />
         <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5 sm:col-span-2" rows={3} />
         <div className="sm:col-span-2 flex gap-2">
           <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
@@ -343,7 +344,7 @@ function WritersManager({ writers, reload }: { writers: Writer[]; reload: () => 
         <input placeholder="Name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input placeholder="Specialty" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
         <input type="number" min={1} max={5} step={0.1} placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="rounded-xl border border-black/10 px-4 py-2.5" />
-        <input placeholder="Avatar URL" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
+        <ImageUpload value={form.avatar_url} onChange={(url) => setForm({ ...form, avatar_url: url })} folder="writers" />
         <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5 sm:col-span-2" rows={3} />
         <div className="sm:col-span-2 flex gap-2">
           <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
@@ -514,7 +515,96 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
         </form>
       </div>
 
+      <AdminAlertToggle />
       <AnnouncementSender />
+    </div>
+  )
+}
+
+function AdminAlertToggle() {
+  const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
+  const [supported, setSupported] = useState(false)
+  const [subscribed, setSubscribed] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    const ok = 'serviceWorker' in navigator && 'PushManager' in window && !!VAPID_PUBLIC_KEY
+    setSupported(ok)
+    if (!ok) return
+    navigator.serviceWorker.register('/sw.js').then(async (reg) => {
+      const existing = await reg.pushManager.getSubscription()
+      setSubscribed(!!existing)
+    })
+  }, [])
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const rawData = window.atob(base64)
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)))
+  }
+
+  async function enable() {
+    setLoading(true)
+    setError(false)
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const email = sessionData.session?.user.email
+      if (!email) throw new Error('no session')
+
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        setLoading(false)
+        return
+      }
+      const reg = await navigator.serviceWorker.register('/sw.js')
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      })
+      const json = sub.toJSON()
+      const { error: insertError } = await supabase.from('push_subscriptions').insert({
+        endpoint: json.endpoint,
+        p256dh: json.keys?.p256dh,
+        auth: json.keys?.auth,
+        role: 'admin',
+        admin_email: email,
+      })
+      if (insertError) {
+        setError(true)
+        await sub.unsubscribe()
+        return
+      }
+      setSubscribed(true)
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!supported) return null
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold mb-1">Admin Alerts</h2>
+      <p className="text-sm text-black/50 mb-4">
+        Get a browser notification on this device whenever a new review comes in for approval.
+      </p>
+      <div className="rounded-xl border hairline bg-white p-6 max-w-xl flex items-center justify-between">
+        <span className="text-sm font-medium">
+          {subscribed ? 'Alerts are on for this device' : 'Alerts are off for this device'}
+        </span>
+        <button
+          onClick={enable}
+          disabled={subscribed || loading}
+          className="bg-brand-blue text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-brand-blue-light disabled:opacity-60"
+        >
+          {loading ? 'Enabling…' : subscribed ? 'Enabled' : 'Enable'}
+        </button>
+      </div>
+      {error && <p className="text-red-500 text-sm mt-2">Something went wrong — try again.</p>}
     </div>
   )
 }

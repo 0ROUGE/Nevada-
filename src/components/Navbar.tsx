@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowRight } from 'lucide-react'
+import { Menu, X, ArrowRight, LockKeyhole } from 'lucide-react'
 import NotifyButton from './NotifyButton'
+import ThemeToggle from './ThemeToggle'
 
 const links = [
   { to: '/what-we-do', label: 'What We Do' },
@@ -43,7 +44,17 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1">
+            <ThemeToggle />
             <NotifyButton />
+            <Link
+              to="/admin/login"
+              aria-label="Admin login"
+              title="Admin login"
+              className="hidden sm:flex items-center gap-1.5 ml-1 pl-3 pr-3.5 py-1.5 rounded-full border hairline text-xs font-semibold text-ink-muted hover:text-brand-blue hover:border-brand-blue/40 transition-colors"
+            >
+              <LockKeyhole size={13} />
+              Admin
+            </Link>
             <button
               onClick={() => setOpen(true)}
               className="md:hidden p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
@@ -69,13 +80,16 @@ export default function Navbar() {
           >
             <div className="flex items-center justify-between px-5 h-16 border-b hairline">
               <span className="font-serif-display text-2xl font-semibold text-ink">Essayz</span>
-              <button
-                onClick={() => setOpen(false)}
-                className="p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
-                aria-label="Close menu"
-              >
-                <X size={22} strokeWidth={1.75} />
-              </button>
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <button
+                  onClick={() => setOpen(false)}
+                  className="p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X size={22} strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
 
             <nav className="px-5 pt-4">
@@ -111,6 +125,20 @@ export default function Navbar() {
                   </motion.div>
                 )
               })}
+              <motion.div
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25, delay: links.length * 0.04, ease: 'easeOut' }}
+              >
+                <Link
+                  to="/admin/login"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 py-4 text-sm font-semibold text-ink-muted"
+                >
+                  <LockKeyhole size={16} />
+                  Admin Login
+                </Link>
+              </motion.div>
             </nav>
           </motion.div>
         )}

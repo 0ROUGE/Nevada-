@@ -43,7 +43,7 @@ export default function Writers() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="card-lift rounded-xl bg-white border hairline p-6 text-center"
+              className="card-lift rounded-xl bg-surface border hairline p-6 text-center"
             >
               <img
                 src={w.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${w.name}`}

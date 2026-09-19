@@ -2,11 +2,12 @@
 @import "tailwindcss";
 
 @theme {
-  /* Editorial color system */
+  /* Editorial color system (light defaults) */
   --color-ink: #111111;
   --color-ink-muted: #6b7280;
   --color-hairline: #e5e7eb;
   --color-paper: #fefefe;
+  --color-surface: #ffffff;
   --color-brand-blue: #2563eb;
   --color-brand-blue-light: #60a5fa;
   --color-brand-blue-tint: #eff4ff;
@@ -14,6 +15,18 @@
 
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+}
+
+/* Dark mode overrides — toggled via data-theme attribute on <html>, see ThemeToggle */
+:root[data-theme='dark'] {
+  --color-ink: #f3f4f6;
+  --color-ink-muted: #9ca3af;
+  --color-hairline: #2a2a2e;
+  --color-paper: #121214;
+  --color-surface: #1a1a1d;
+  --color-brand-blue: #3b82f6;
+  --color-brand-blue-light: #60a5fa;
+  --color-brand-blue-tint: #16223f;
 }
 
 html {
@@ -26,6 +39,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .font-serif-display {
@@ -39,7 +53,7 @@ body {
 .card-lift:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 24px -12px rgba(17, 17, 17, 0.12);
-  border-color: #d1d5db;
+  border-color: color-mix(in oklab, var(--color-ink) 25%, transparent);
 }
 
 .tilt-card {

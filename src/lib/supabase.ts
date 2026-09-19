@@ -9,7 +9,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    experimental: { passkey: true },
+  },
+})
 
 export type Service = {
   id: string

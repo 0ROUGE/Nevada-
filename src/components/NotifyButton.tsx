@@ -16,6 +16,7 @@ export default function NotifyButton() {
   const [supported, setSupported] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     const ok = 'serviceWorker' in navigator && 'PushManager' in window && !!VAPID_PUBLIC_KEY
@@ -30,6 +31,7 @@ export default function NotifyButton() {
   async function subscribe() {
     if (!supported || loading) return
     setLoading(true)
+    setError(false)
     try {
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
@@ -42,12 +44,20 @@ export default function NotifyButton() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       })
       const json = sub.toJSON()
-      await supabase.from('push_subscriptions').insert({
+      const { error: insertError } = await supabase.from('push_subscriptions').insert({
         endpoint: json.endpoint,
         p256dh: json.keys?.p256dh,
         auth: json.keys?.auth,
+        role: 'public',
       })
+      if (insertError) {
+        setError(true)
+        await sub.unsubscribe()
+        return
+      }
       setSubscribed(true)
+    } catch {
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -60,9 +70,19 @@ export default function NotifyButton() {
       whileTap={{ scale: 0.9 }}
       onClick={subscribe}
       disabled={subscribed || loading}
-      title={subscribed ? "You're subscribed to updates" : 'Get notified about new services'}
+      title={
+        error
+          ? 'Something went wrong — tap to try again'
+          : subscribed
+            ? "You're subscribed to updates"
+            : 'Get notified about new services'
+      }
       className={`p-2 rounded-full transition-colors ${
-        subscribed ? 'text-brand-blue' : 'text-black/60 hover:text-brand-blue hover:bg-black/5'
+        error
+          ? 'text-red-500'
+          : subscribed
+            ? 'text-brand-blue'
+            : 'text-ink-muted hover:text-brand-blue hover:bg-black/5'
       }`}
     >
       {subscribed ? <BellRing size={20} /> : <Bell size={20} />}

@@ -56,7 +56,7 @@ export default function Testimonials() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.4 }}
-                  className="rounded-xl bg-white border hairline p-8 sm:p-10 w-full"
+                  className="rounded-xl bg-surface border hairline p-8 sm:p-10 w-full"
                 >
                   <p className="font-serif-display text-4xl text-brand-blue/25 leading-none mb-2">
                     &ldquo;

@@ -41,7 +41,7 @@ export default function Reviews() {
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-xl bg-white border hairline p-8 text-center"
+          className="rounded-xl bg-surface border hairline p-8 text-center"
           role="status"
         >
           <p className="font-semibold text-brand-blue">Thank you for your review!</p>
@@ -54,7 +54,7 @@ export default function Reviews() {
           onSubmit={submit}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl bg-white border hairline p-6 sm:p-8 space-y-5"
+          className="rounded-xl bg-surface border hairline p-6 sm:p-8 space-y-5"
         >
           <div>
             <label htmlFor="review-name" className="block text-sm font-semibold text-ink mb-1.5">
