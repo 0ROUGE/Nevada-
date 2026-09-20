@@ -50,6 +50,8 @@ export type SiteSettings = {
   id: number
   whatsapp_number: string | null
   whatsapp_business_number: string | null
+  whatsapp_number_verified: boolean | null
+  whatsapp_business_number_verified: boolean | null
   what_we_do_text: string | null
   my_assignments_text: string | null
 }

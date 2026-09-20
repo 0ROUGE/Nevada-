@@ -5,7 +5,7 @@ import { LayoutDashboard, Briefcase, MessageSquare, Users, Settings as SettingsI
 import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
 import ImageUpload from '../../components/ImageUpload'
-import KenyaPhoneInput from '../../components/KenyaPhoneInput'
+import PhoneVerify from '../../components/PhoneVerify'
 import { formatPrice } from '../../lib/price'
 import ShareMenu from '../../components/ShareMenu'
 
@@ -223,11 +223,26 @@ function generateDescription(title: string, category: string): string {
   return `Professional ${cat} help with ${title.trim().toLowerCase()}, delivered with clarity, accuracy, and attention to detail.`
 }
 
+async function generateDescriptionAI(title: string, category: string): Promise<string> {
+  if (!title.trim()) return ''
+  try {
+    const { data, error } = await supabase.functions.invoke('generate-description', {
+      body: { title, category },
+    })
+    if (error || data?.error || !data?.description) throw new Error('AI generation unavailable')
+    return data.description
+  } catch {
+    // Falls back to the template if the AI call fails (e.g. no API credit)
+    return generateDescription(title, category)
+  }
+}
+
 function ServicesManager({ services, reload }: { services: Service[]; reload: () => void }) {
   const empty = { title: '', description: '', price_min: '', price_max: '', category: '', image_url: '' }
   const [form, setForm] = useState(empty)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [autoFilling, setAutoFilling] = useState(false)
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
@@ -275,9 +290,10 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
           required
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-          onBlur={() => {
-            if (!editingId && !form.description) {
-              setForm((f) => ({ ...f, description: generateDescription(f.title, f.category) }))
+          onBlur={async () => {
+            if (!editingId && !form.description && form.title) {
+              const desc = await generateDescriptionAI(form.title, form.category)
+              setForm((f) => (f.description ? f : { ...f, description: desc }))
             }
           }}
           className="rounded-xl border border-black/10 px-4 py-2.5"
@@ -307,15 +323,20 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
             <label className="text-sm font-medium">Description</label>
             <button
               type="button"
-              onClick={() => setForm((f) => ({ ...f, description: generateDescription(f.title, f.category) }))}
-              disabled={!form.title}
+              onClick={async () => {
+                setAutoFilling(true)
+                const desc = await generateDescriptionAI(form.title, form.category)
+                setForm((f) => ({ ...f, description: desc }))
+                setAutoFilling(false)
+              }}
+              disabled={!form.title || autoFilling}
               className="text-xs font-semibold text-brand-blue disabled:opacity-40"
             >
-              ✨ Auto-fill
+              {autoFilling ? 'Generating…' : '✨ Auto-fill'}
             </button>
           </div>
           <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-2.5" rows={3} />
-          <p className="text-xs text-black/40 mt-1">Auto-fill uses a quick template for now — flag it to upgrade to real AI generation.</p>
+          <p className="text-xs text-black/40 mt-1">AI-generated via Claude — falls back to a quick template if unavailable.</p>
         </div>
         <div className="sm:col-span-2 flex gap-2">
           <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
@@ -563,11 +584,17 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
     what_we_do_text: settings.what_we_do_text ?? '',
     my_assignments_text: settings.my_assignments_text ?? '',
   })
+  const [personalVerified, setPersonalVerified] = useState(!!settings.whatsapp_number_verified)
+  const [businessVerified, setBusinessVerified] = useState(!!settings.whatsapp_business_number_verified)
   const [saved, setSaved] = useState(false)
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
-    await supabase.from('site_settings').update(form).eq('id', 1)
+    await supabase.from('site_settings').update({
+      ...form,
+      whatsapp_number_verified: personalVerified,
+      whatsapp_business_number_verified: businessVerified,
+    }).eq('id', 1)
     setSaved(true)
     reload()
     setTimeout(() => setSaved(false), 2000)
@@ -578,15 +605,27 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
       <div>
         <h2 className="text-2xl font-bold mb-6">Settings</h2>
         <form onSubmit={save} className="rounded-xl border hairline bg-white p-6 space-y-4 max-w-xl">
-          <KenyaPhoneInput
+          <PhoneVerify
             label="WhatsApp Number (Personal) — used for ordering services"
             value={form.whatsapp_number}
-            onChange={(v) => setForm({ ...form, whatsapp_number: v })}
+            onChange={(v) => {
+              setForm({ ...form, whatsapp_number: v })
+              if (v !== settings.whatsapp_number) setPersonalVerified(false)
+            }}
+            verified={personalVerified}
+            onVerified={() => setPersonalVerified(true)}
+            context="admin_whatsapp_personal"
           />
-          <KenyaPhoneInput
+          <PhoneVerify
             label="WhatsApp Business Number (optional)"
             value={form.whatsapp_business_number}
-            onChange={(v) => setForm({ ...form, whatsapp_business_number: v })}
+            onChange={(v) => {
+              setForm({ ...form, whatsapp_business_number: v })
+              if (v !== settings.whatsapp_business_number) setBusinessVerified(false)
+            }}
+            verified={businessVerified}
+            onVerified={() => setBusinessVerified(true)}
+            context="admin_whatsapp_business"
           />
           <div>
             <label className="block text-sm font-medium mb-1">What We Do text</label>
