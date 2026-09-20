@@ -21,8 +21,8 @@ export default function Writers() {
   }, [])
 
   return (
-    <section className="max-w-[1200px] mx-auto px-5 sm:px-8 py-20 sm:py-24">
-      <div className="text-center mb-14">
+    <section className="max-w-[1200px] mx-auto px-5 sm:px-8 py-12 sm:py-16">
+      <div className="text-center mb-8">
         <p className="eyebrow mb-3">The Team</p>
         <h1 className="font-serif-display text-4xl text-ink">Favourite Writers</h1>
       </div>

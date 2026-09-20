@@ -41,7 +41,7 @@ export default function AccountLogin() {
   }
 
   return (
-    <section className="max-w-[420px] mx-auto px-5 sm:px-8 py-20 sm:py-24">
+    <section className="max-w-[420px] mx-auto px-5 sm:px-8 py-12 sm:py-16">
       <div className="text-center mb-8">
         <p className="eyebrow mb-3">Your Account</p>
         <h1 className="font-serif-display text-3xl text-ink">

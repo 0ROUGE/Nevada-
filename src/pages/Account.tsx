@@ -46,8 +46,8 @@ export default function Account() {
   if (checking) return null
 
   return (
-    <section className="max-w-[720px] mx-auto px-5 sm:px-8 py-16 sm:py-20">
-      <div className="flex items-center justify-between mb-10">
+    <section className="max-w-[720px] mx-auto px-5 sm:px-8 py-10 sm:py-12">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <p className="eyebrow mb-2">Your Account</p>
           <h1 className="font-serif-display text-3xl text-ink">{email}</h1>
@@ -61,7 +61,7 @@ export default function Account() {
         </button>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Package size={18} className="text-brand-blue" />
           <h2 className="font-serif-display text-xl text-ink">My Assignments</h2>

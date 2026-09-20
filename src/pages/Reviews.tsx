@@ -31,8 +31,8 @@ export default function Reviews() {
   }
 
   return (
-    <section className="max-w-[560px] mx-auto px-5 sm:px-8 py-20 sm:py-24">
-      <div className="text-center mb-10">
+    <section className="max-w-[560px] mx-auto px-5 sm:px-8 py-12 sm:py-16">
+      <div className="text-center mb-6">
         <p className="eyebrow mb-3">Your Voice</p>
         <motion.h1
           initial={{ opacity: 0, y: 20 }}

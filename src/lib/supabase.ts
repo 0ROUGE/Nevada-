@@ -20,6 +20,8 @@ export type Service = {
   title: string
   description: string | null
   price_range: string | null
+  price_min: number | null
+  price_max: number | null
   category: string | null
   image_url: string | null
   created_at: string

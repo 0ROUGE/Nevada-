@@ -8,6 +8,7 @@ import PageSkeleton from './components/PageSkeleton'
 import SignupPromptModal from './components/SignupPromptModal'
 
 const Home = lazy(() => import('./pages/Home'))
+const ServiceDetail = lazy(() => import('./pages/ServiceDetail'))
 const WhatWeDo = lazy(() => import('./pages/WhatWeDo'))
 const MyAssignments = lazy(() => import('./pages/MyAssignments'))
 const Writers = lazy(() => import('./pages/Writers'))
@@ -39,6 +40,7 @@ export default function App() {
       <Suspense fallback={<PageSkeleton />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+          <Route path="/service/:id" element={<PublicLayout><ServiceDetail /></PublicLayout>} />
           <Route path="/what-we-do" element={<PublicLayout><WhatWeDo /></PublicLayout>} />
           <Route path="/my-assignments" element={<PublicLayout><MyAssignments /></PublicLayout>} />
           <Route path="/writers" element={<PublicLayout><Writers /></PublicLayout>} />

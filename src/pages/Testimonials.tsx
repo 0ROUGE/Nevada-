@@ -31,9 +31,9 @@ export default function Testimonials() {
   }
 
   return (
-    <section className="max-w-[640px] mx-auto px-5 sm:px-8 py-20 sm:py-24 text-center">
+    <section className="max-w-[640px] mx-auto px-5 sm:px-8 py-12 sm:py-16 text-center">
       <p className="eyebrow mb-3">Kind Words</p>
-      <h1 className="font-serif-display text-4xl text-ink mb-14">Testimonials</h1>
+      <h1 className="font-serif-display text-4xl text-ink mb-8">Testimonials</h1>
 
       {reviews.length === 0 ? (
         <p className="text-ink-muted">No testimonials yet.</p>

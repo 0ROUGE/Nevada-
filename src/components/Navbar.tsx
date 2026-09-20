@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ArrowRight, LockKeyhole } from 'lucide-react'
 import NotifyButton from './NotifyButton'
 import ThemeToggle from './ThemeToggle'
+import ShareMenu from './ShareMenu'
 
 const links = [
   { to: '/what-we-do', label: 'What We Do' },
@@ -47,6 +48,7 @@ export default function Navbar() {
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <NotifyButton />
+            <ShareMenu />
             <Link
               to="/admin/login"
               aria-label="Admin login"

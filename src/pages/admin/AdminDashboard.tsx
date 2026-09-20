@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
 import ImageUpload from '../../components/ImageUpload'
 import KenyaPhoneInput from '../../components/KenyaPhoneInput'
+import { formatPrice } from '../../lib/price'
+import ShareMenu from '../../components/ShareMenu'
 
 type Tab = 'overview' | 'services' | 'reviews' | 'writers' | 'settings' | 'admins'
 
@@ -86,9 +88,12 @@ export default function AdminDashboard() {
           <img src="/favicon.svg" alt="" className="w-6 h-6 rounded" />
           <span className="font-serif-display font-semibold">Essayz</span>
         </h1>
-        <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
-          <Menu size={22} />
-        </button>
+        <div className="flex items-center gap-1">
+          <ShareMenu dark />
+          <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+            <Menu size={22} />
+          </button>
+        </div>
       </div>
 
       {/* Sidebar: fixed drawer on mobile, static column on desktop */}
@@ -106,9 +111,12 @@ export default function AdminDashboard() {
                 <img src="/favicon.svg" alt="" className="w-7 h-7 rounded-md" />
                 <span className="font-serif-display font-semibold">Essayz</span>
               </h1>
-              <button onClick={() => setSidebarOpen(false)} className="md:hidden" aria-label="Close menu">
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-1">
+                <ShareMenu dark />
+                <button onClick={() => setSidebarOpen(false)} className="md:hidden" aria-label="Close menu">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
             <nav className="flex-1 space-y-1">
               {tabs.map((t) => (
@@ -209,18 +217,32 @@ function Overview({
   )
 }
 
+function generateDescription(title: string, category: string): string {
+  if (!title.trim()) return ''
+  const cat = category.trim() ? category.trim().toLowerCase() : 'writing'
+  return `Professional ${cat} help with ${title.trim().toLowerCase()}, delivered with clarity, accuracy, and attention to detail.`
+}
+
 function ServicesManager({ services, reload }: { services: Service[]; reload: () => void }) {
-  const empty = { title: '', description: '', price_range: '', category: '', image_url: '' }
+  const empty = { title: '', description: '', price_min: '', price_max: '', category: '', image_url: '' }
   const [form, setForm] = useState(empty)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
+    const payload = {
+      title: form.title,
+      description: form.description,
+      category: form.category,
+      image_url: form.image_url,
+      price_min: form.price_min === '' ? null : Number(form.price_min),
+      price_max: form.price_max === '' ? null : Number(form.price_max),
+    }
     if (editingId) {
-      await supabase.from('services').update(form).eq('id', editingId)
+      await supabase.from('services').update(payload).eq('id', editingId)
     } else {
-      await supabase.from('services').insert(form)
+      await supabase.from('services').insert(payload)
     }
     setForm(empty)
     setEditingId(null)
@@ -232,7 +254,8 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
     setForm({
       title: s.title,
       description: s.description ?? '',
-      price_range: s.price_range ?? '',
+      price_min: s.price_min?.toString() ?? '',
+      price_max: s.price_max?.toString() ?? '',
       category: s.category ?? '',
       image_url: s.image_url ?? '',
     })
@@ -247,11 +270,53 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
     <div>
       <h2 className="text-2xl font-bold mb-6">Services</h2>
       <form onSubmit={save} className="rounded-xl border hairline bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <input placeholder="Title" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
+        <input
+          placeholder="Title"
+          required
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          onBlur={() => {
+            if (!editingId && !form.description) {
+              setForm((f) => ({ ...f, description: generateDescription(f.title, f.category) }))
+            }
+          }}
+          className="rounded-xl border border-black/10 px-4 py-2.5"
+        />
         <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
-        <input placeholder="Price Range (e.g. KES 500 - 2000)" value={form.price_range} onChange={(e) => setForm({ ...form, price_range: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5" />
+        <div className="flex gap-2">
+          <input
+            type="number"
+            min={0}
+            placeholder="Min price (KES)"
+            value={form.price_min}
+            onChange={(e) => setForm({ ...form, price_min: e.target.value })}
+            className="w-full rounded-xl border border-black/10 px-4 py-2.5"
+          />
+          <input
+            type="number"
+            min={0}
+            placeholder="Max price (KES)"
+            value={form.price_max}
+            onChange={(e) => setForm({ ...form, price_max: e.target.value })}
+            className="w-full rounded-xl border border-black/10 px-4 py-2.5"
+          />
+        </div>
         <ImageUpload value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} folder="services" />
-        <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl border border-black/10 px-4 py-2.5 sm:col-span-2" rows={3} />
+        <div className="sm:col-span-2">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-sm font-medium">Description</label>
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, description: generateDescription(f.title, f.category) }))}
+              disabled={!form.title}
+              className="text-xs font-semibold text-brand-blue disabled:opacity-40"
+            >
+              ✨ Auto-fill
+            </button>
+          </div>
+          <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-2.5" rows={3} />
+          <p className="text-xs text-black/40 mt-1">Auto-fill uses a quick template for now — flag it to upgrade to real AI generation.</p>
+        </div>
         <div className="sm:col-span-2 flex gap-2">
           <button type="submit" className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light">
             {editingId ? 'Update Service' : 'Add Service'}
@@ -269,7 +334,7 @@ function ServicesManager({ services, reload }: { services: Service[]; reload: ()
           <div key={s.id} className="flex items-center justify-between bg-white rounded-2xl border border-black/5 p-4">
             <div>
               <p className="font-semibold">{s.title}</p>
-              <p className="text-sm text-black/50">{s.category} · {s.price_range}</p>
+              <p className="text-sm text-black/50">{s.category} · {formatPrice(s)}</p>
             </div>
             <div className="flex gap-3 items-center">
               <button
@@ -557,7 +622,32 @@ function AdminAlertToggle() {
     if (!ok) return
     navigator.serviceWorker.register('/sw.js').then(async (reg) => {
       const existing = await reg.pushManager.getSubscription()
-      setSubscribed(!!existing)
+      if (!existing) {
+        setSubscribed(false)
+        return
+      }
+      const { data } = await supabase
+        .from('push_subscriptions')
+        .select('id')
+        .eq('endpoint', existing.endpoint)
+        .maybeSingle()
+
+      if (data) {
+        setSubscribed(true)
+        return
+      }
+      // Stale browser permission with no DB record — heal it silently.
+      const { data: sessionData } = await supabase.auth.getSession()
+      const email = sessionData.session?.user.email
+      if (!email) return
+      const { error: healError } = await supabase.from('push_subscriptions').insert({
+        endpoint: existing.endpoint,
+        p256dh: existing.toJSON().keys?.p256dh,
+        auth: existing.toJSON().keys?.auth,
+        role: 'admin',
+        admin_email: email,
+      })
+      setSubscribed(!healError)
     })
   }, [])
 

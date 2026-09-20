@@ -12,6 +12,20 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)))
 }
 
+async function insertSubscription(sub: PushSubscription, role: 'public' | 'admin', adminEmail?: string) {
+  const json = sub.toJSON()
+  return supabase.from('push_subscriptions').upsert(
+    {
+      endpoint: json.endpoint,
+      p256dh: json.keys?.p256dh,
+      auth: json.keys?.auth,
+      role,
+      admin_email: adminEmail ?? null,
+    },
+    { onConflict: 'endpoint' }
+  )
+}
+
 export default function NotifyButton() {
   const [supported, setSupported] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
@@ -22,9 +36,27 @@ export default function NotifyButton() {
     const ok = 'serviceWorker' in navigator && 'PushManager' in window && !!VAPID_PUBLIC_KEY
     setSupported(ok)
     if (!ok) return
+
     navigator.serviceWorker.register('/sw.js').then(async (reg) => {
       const existing = await reg.pushManager.getSubscription()
-      setSubscribed(!!existing)
+      if (!existing) {
+        setSubscribed(false)
+        return
+      }
+      // Don't trust the browser alone — confirm a matching row actually exists.
+      const { data } = await supabase
+        .from('push_subscriptions')
+        .select('id')
+        .eq('endpoint', existing.endpoint)
+        .maybeSingle()
+
+      if (data) {
+        setSubscribed(true)
+      } else {
+        // Stale browser permission with no DB record — heal it silently.
+        const { error: healError } = await insertSubscription(existing, 'public')
+        setSubscribed(!healError)
+      }
     })
   }, [])
 
@@ -43,13 +75,7 @@ export default function NotifyButton() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       })
-      const json = sub.toJSON()
-      const { error: insertError } = await supabase.from('push_subscriptions').insert({
-        endpoint: json.endpoint,
-        p256dh: json.keys?.p256dh,
-        auth: json.keys?.auth,
-        role: 'public',
-      })
+      const { error: insertError } = await insertSubscription(sub, 'public')
       if (insertError) {
         setError(true)
         await sub.unsubscribe()

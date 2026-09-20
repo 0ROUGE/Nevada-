@@ -26,7 +26,7 @@ export default function Contact() {
   }
 
   return (
-    <section className="max-w-[640px] mx-auto px-5 sm:px-8 py-20 sm:py-24 text-center">
+    <section className="max-w-[640px] mx-auto px-5 sm:px-8 py-12 sm:py-16 text-center">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
