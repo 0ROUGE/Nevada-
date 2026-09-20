@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowRight, LockKeyhole } from 'lucide-react'
+import { Menu, X, ArrowRight, LockKeyhole, UserCircle } from 'lucide-react'
 import NotifyButton from './NotifyButton'
 import ThemeToggle from './ThemeToggle'
 import ShareMenu from './ShareMenu'
+import { supabase } from '../lib/supabase'
 
 const links = [
   { to: '/what-we-do', label: 'What We Do' },
@@ -17,7 +18,16 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const [signedIn, setSignedIn] = useState(false)
   const location = useLocation()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
   return (
     <>
@@ -135,6 +145,24 @@ export default function Navbar() {
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25, delay: links.length * 0.04, ease: 'easeOut' }}
+                className="border-b hairline"
+              >
+                <Link
+                  to={signedIn ? '/account' : '/account/login'}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between py-4 group"
+                >
+                  <span className="flex items-center gap-2 text-lg font-medium text-ink">
+                    <UserCircle size={19} className="text-ink-muted" />
+                    {signedIn ? 'My Account' : 'Sign In'}
+                  </span>
+                  <ArrowRight size={18} className="text-ink/30 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25, delay: (links.length + 1) * 0.04, ease: 'easeOut' }}
               >
                 <Link
                   to="/admin/login"
