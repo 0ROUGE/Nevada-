@@ -6,6 +6,7 @@ import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
 import PageSkeleton from './components/PageSkeleton'
 import SignupPromptModal from './components/SignupPromptModal'
+import PhoneNudgeModal from './components/PhoneNudgeModal'
 
 const Home = lazy(() => import('./pages/Home'))
 const ServiceDetail = lazy(() => import('./pages/ServiceDetail'))
@@ -29,6 +30,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
       <FloatingWhatsApp />
       <Footer />
       <SignupPromptModal />
+      <PhoneNudgeModal />
     </div>
   )
 }
