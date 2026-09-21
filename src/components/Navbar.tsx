@@ -6,6 +6,10 @@ import NotifyButton from './NotifyButton'
 import ThemeToggle from './ThemeToggle'
 import ShareMenu from './ShareMenu'
 import { supabase } from '../lib/supabase'
+import NewFeatureDot, { useNewFeatureBadge } from './NewFeatureDot'
+
+// Bump this string whenever something new ships that's worth flagging in the menu.
+const MENU_FEATURE_VERSION = '2026-account-in-menu'
 
 const links = [
   { to: '/what-we-do', label: 'What We Do' },
@@ -20,6 +24,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [signedIn, setSignedIn] = useState(false)
   const location = useLocation()
+  const { visible: showNewBadge, markSeen } = useNewFeatureBadge('nav-menu', MENU_FEATURE_VERSION)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session))
@@ -69,11 +74,15 @@ export default function Navbar() {
               Admin
             </Link>
             <button
-              onClick={() => setOpen(true)}
-              className="md:hidden p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
+              onClick={() => {
+                setOpen(true)
+                markSeen()
+              }}
+              className="relative md:hidden p-2 -mr-2 rounded-lg hover:bg-black/5 transition-colors"
               aria-label="Open menu"
             >
               <Menu size={22} strokeWidth={1.75} />
+              <NewFeatureDot show={showNewBadge} />
             </button>
           </div>
         </div>

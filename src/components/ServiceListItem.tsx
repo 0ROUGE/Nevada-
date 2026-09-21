@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 import type { Service } from '../lib/supabase'
 
 export default function ServiceListItem({
@@ -14,7 +15,28 @@ export default function ServiceListItem({
   highlighted?: boolean
 }) {
   const [open, setOpen] = useState(highlighted)
+  const [checkingAuth, setCheckingAuth] = useState(false)
   const navigate = useNavigate()
+
+  async function seeMore() {
+    if (checkingAuth) return
+    setCheckingAuth(true)
+    const destination = `/service/${service.id}`
+    try {
+      const { data } = await supabase.auth.getSession()
+      if (data.session) {
+        navigate(destination)
+      } else {
+        navigate(`/account/login?redirect=${encodeURIComponent(destination)}`)
+      }
+    } catch {
+      // If the auth check itself fails, fail safe toward account setup
+      // rather than blocking navigation entirely.
+      navigate(`/account/login?redirect=${encodeURIComponent(destination)}`)
+    } finally {
+      setCheckingAuth(false)
+    }
+  }
 
   return (
     <motion.div
@@ -60,10 +82,11 @@ export default function ServiceListItem({
           >
             <div className="px-5 pb-4 pt-1">
               <button
-                onClick={() => navigate(`/service/${service.id}`)}
-                className="w-full bg-brand-blue text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-brand-blue-light transition-all active:scale-[0.98]"
+                onClick={seeMore}
+                disabled={checkingAuth}
+                className="w-full bg-brand-blue text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-brand-blue-light transition-all active:scale-[0.98] disabled:opacity-70"
               >
-                See More
+                {checkingAuth ? 'Loading…' : 'See More'}
               </button>
             </div>
           </motion.div>

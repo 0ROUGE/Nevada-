@@ -8,9 +8,14 @@ export default function Footer() {
           <img src="/favicon.svg" alt="" className="w-4 h-4 rounded" />
           © {new Date().getFullYear()} Essayz
         </p>
-        <Link to="/admin/login" className="text-xs text-ink-muted/60 hover:text-ink-muted transition-colors">
-          Admin
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/terms" className="text-xs text-ink-muted/60 hover:text-ink-muted transition-colors">
+            Terms
+          </Link>
+          <Link to="/admin/login" className="text-xs text-ink-muted/60 hover:text-ink-muted transition-colors">
+            Admin
+          </Link>
+        </div>
       </div>
     </footer>
   )

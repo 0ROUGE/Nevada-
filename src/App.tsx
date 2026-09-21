@@ -15,6 +15,7 @@ const Writers = lazy(() => import('./pages/Writers'))
 const Reviews = lazy(() => import('./pages/Reviews'))
 const Testimonials = lazy(() => import('./pages/Testimonials'))
 const Contact = lazy(() => import('./pages/Contact'))
+const Terms = lazy(() => import('./pages/Terms'))
 const Account = lazy(() => import('./pages/Account'))
 const AccountLogin = lazy(() => import('./pages/AccountLogin'))
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/reviews" element={<PublicLayout><Reviews /></PublicLayout>} />
           <Route path="/testimonials" element={<PublicLayout><Testimonials /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+          <Route path="/terms" element={<PublicLayout><Terms /></PublicLayout>} />
           <Route path="/account" element={<PublicLayout><Account /></PublicLayout>} />
           <Route path="/account/login" element={<PublicLayout><AccountLogin /></PublicLayout>} />
           <Route path="/admin/login" element={<AdminLogin />} />

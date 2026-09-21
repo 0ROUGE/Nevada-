@@ -1,19 +1,34 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { getSessionId } from '../lib/session'
+
+function safeRedirect(path: string | null): string {
+  if (!path) return '/account'
+  // Only allow internal, same-origin paths — never an absolute or protocol-relative URL.
+  if (!path.startsWith('/') || path.startsWith('//')) return '/account'
+  return path
+}
 
 export default function AccountLogin() {
   const [mode, setMode] = useState<'signup' | 'login'>('signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTo = safeRedirect(searchParams.get('redirect'))
+  const cameFromService = redirectTo.startsWith('/service/')
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    if (mode === 'signup' && !agreed) {
+      setError('Please agree to the Terms & Conditions to continue.')
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -26,7 +41,7 @@ export default function AccountLogin() {
       }
       // Link any orders/reviews made before this account existed
       await supabase.rpc('claim_anonymous_activity', { p_session_id: getSessionId() })
-      navigate('/account')
+      navigate(redirectTo)
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) {
@@ -35,7 +50,7 @@ export default function AccountLogin() {
         return
       }
       await supabase.rpc('claim_anonymous_activity', { p_session_id: getSessionId() })
-      navigate('/account')
+      navigate(redirectTo)
     }
     setLoading(false)
   }
@@ -48,9 +63,11 @@ export default function AccountLogin() {
           {mode === 'signup' ? 'Create an account' : 'Welcome back'}
         </h1>
         <p className="text-ink-muted text-sm mt-2">
-          {mode === 'signup'
-            ? 'Keep track of your assignments and reviews.'
-            : 'Sign in to see your history.'}
+          {cameFromService
+            ? 'Create a free account to see the full details of this service.'
+            : mode === 'signup'
+              ? 'Keep track of your assignments and reviews.'
+              : 'Sign in to see your history.'}
         </p>
       </div>
 
@@ -87,10 +104,28 @@ export default function AccountLogin() {
             className="w-full rounded-lg border hairline px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue transition-shadow"
           />
         </div>
+
+        {mode === 'signup' && (
+          <label className="flex items-start gap-2.5 text-sm text-ink-muted cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 accent-brand-blue"
+            />
+            <span>
+              I agree to the{' '}
+              <Link to="/terms" target="_blank" className="text-brand-blue font-medium underline">
+                Terms &amp; Conditions
+              </Link>
+            </span>
+          </label>
+        )}
+
         {error && <p className="text-red-500 text-sm" role="alert">{error}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (mode === 'signup' && !agreed)}
           className="w-full bg-brand-blue text-white text-sm font-semibold py-3 rounded-lg hover:bg-brand-blue-light transition-all active:scale-[0.98] disabled:opacity-60"
         >
           {loading ? 'Please wait…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
