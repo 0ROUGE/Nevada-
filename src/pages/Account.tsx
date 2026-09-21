@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Package, Star, LogOut } from 'lucide-react'
+import { Package, Star, LogOut, Phone } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Review } from '../lib/supabase'
+import PhoneVerify from '../components/PhoneVerify'
 
 type Order = {
   id: string
@@ -15,8 +16,11 @@ export default function Account() {
   const navigate = useNavigate()
   const [checking, setChecking] = useState(true)
   const [email, setEmail] = useState('')
+  const [userId, setUserId] = useState('')
   const [orders, setOrders] = useState<Order[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
+  const [phone, setPhone] = useState('')
+  const [phoneVerified, setPhoneVerified] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -25,18 +29,37 @@ export default function Account() {
         return
       }
       setEmail(data.session.user.email ?? '')
-      const [{ data: orderData }, { data: reviewData }] = await Promise.all([
+      setUserId(data.session.user.id)
+      const [{ data: orderData }, { data: reviewData }, { data: profileData }] = await Promise.all([
         supabase
           .from('customer_orders')
           .select('id, service_title, created_at')
           .order('created_at', { ascending: false }),
         supabase.from('reviews').select('*').order('created_at', { ascending: false }),
+        supabase.from('customer_profiles').select('phone, phone_verified').eq('user_id', data.session.user.id).maybeSingle(),
       ])
       setOrders(orderData ?? [])
       setReviews(reviewData ?? [])
+      setPhone(profileData?.phone ?? '')
+      setPhoneVerified(!!profileData?.phone_verified)
       setChecking(false)
     })
   }, [navigate])
+
+  async function savePhone(canonical: string) {
+    setPhone(canonical)
+    if (!canonical) return
+    await supabase
+      .from('customer_profiles')
+      .upsert({ user_id: userId, phone: canonical, phone_verified: false }, { onConflict: 'user_id' })
+  }
+
+  async function markPhoneVerified() {
+    setPhoneVerified(true)
+    await supabase
+      .from('customer_profiles')
+      .upsert({ user_id: userId, phone, phone_verified: true }, { onConflict: 'user_id' })
+  }
 
   async function logout() {
     await supabase.auth.signOut()
@@ -60,6 +83,24 @@ export default function Account() {
           Sign Out
         </button>
       </div>
+
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6 rounded-lg border hairline p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Phone size={16} className="text-brand-blue" />
+          <h2 className="text-sm font-semibold text-ink">Phone Number</h2>
+        </div>
+        <p className="text-xs text-ink-muted mb-3">
+          Add and verify your number to get SMS updates about your assignments.
+        </p>
+        <PhoneVerify
+          label=""
+          value={phone}
+          onChange={savePhone}
+          verified={phoneVerified}
+          onVerified={markPhoneVerified}
+          context="customer_account"
+        />
+      </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center gap-2 mb-4">

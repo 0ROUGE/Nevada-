@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase'
 import type { Service, Writer, Review, SiteSettings } from '../../lib/supabase'
 import ImageUpload from '../../components/ImageUpload'
 import PhoneVerify from '../../components/PhoneVerify'
+import KenyaPhoneInput from '../../components/KenyaPhoneInput'
 import { formatPrice } from '../../lib/price'
 import ShareMenu from '../../components/ShareMenu'
 
@@ -644,6 +645,7 @@ function SettingsManager({ settings, reload }: { settings: SiteSettings; reload:
 
       <AdminAlertToggle />
       <AnnouncementSender />
+      <SmsSender />
     </div>
   )
 }
@@ -811,6 +813,87 @@ function AnnouncementSender() {
         </button>
         {status === 'sent' && <p className="text-green-600 text-sm">Sent!</p>}
         {status === 'error' && <p className="text-red-500 text-sm">Failed to send — check Edge Function is deployed with VAPID secrets set.</p>}
+      </form>
+    </div>
+  )
+}
+
+function SmsSender() {
+  const [message, setMessage] = useState('')
+  const [target, setTarget] = useState<'all' | 'single'>('all')
+  const [singlePhone, setSinglePhone] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [resultText, setResultText] = useState('')
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault()
+    setStatus('sending')
+    const { data, error } = await supabase.functions.invoke('send-sms', {
+      body: target === 'single' ? { message, target, phone: singlePhone } : { message, target },
+    })
+    if (error || data?.error) {
+      setStatus('error')
+      setResultText(data?.error || error?.message || 'Something went wrong.')
+      return
+    }
+    setStatus('sent')
+    setResultText(
+      data?.note ? data.note : `Sent to ${data?.sent ?? 0} recipient${data?.sent === 1 ? '' : 's'}.`
+    )
+    setMessage('')
+    setTimeout(() => setStatus('idle'), 3000)
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold mb-1">SMS Notification</h2>
+      <p className="text-sm text-black/50 mb-4">
+        Send a real SMS via Infobip to customers with a verified phone number — or to one specific
+        number.
+      </p>
+      <form onSubmit={send} className="rounded-xl border hairline bg-white p-6 space-y-4 max-w-xl">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setTarget('all')}
+            className={`flex-1 text-sm font-semibold py-2 rounded-lg border ${
+              target === 'all' ? 'bg-brand-blue text-white border-brand-blue' : 'hairline text-ink-muted'
+            }`}
+          >
+            All verified customers
+          </button>
+          <button
+            type="button"
+            onClick={() => setTarget('single')}
+            className={`flex-1 text-sm font-semibold py-2 rounded-lg border ${
+              target === 'single' ? 'bg-brand-blue text-white border-brand-blue' : 'hairline text-ink-muted'
+            }`}
+          >
+            One number
+          </button>
+        </div>
+
+        {target === 'single' && (
+          <KenyaPhoneInput label="Phone number" value={singlePhone} onChange={setSinglePhone} />
+        )}
+
+        <textarea
+          placeholder="Message"
+          required
+          rows={3}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="w-full rounded-xl border border-black/10 px-4 py-2.5"
+        />
+        <button
+          type="submit"
+          disabled={status === 'sending' || (target === 'single' && !singlePhone)}
+          className="bg-brand-blue text-white font-medium px-6 py-2.5 rounded-lg hover:bg-brand-blue-light disabled:opacity-60"
+        >
+          {status === 'sending' ? 'Sending…' : 'Send SMS'}
+        </button>
+        {status === 'sent' && <p className="text-green-600 text-sm">{resultText}</p>}
+        {status === 'error' && <p className="text-red-500 text-sm">{resultText}</p>}
       </form>
     </div>
   )
