@@ -70,26 +70,32 @@ export default function Account() {
 
   return (
     <section className="max-w-[720px] mx-auto px-5 sm:px-8 py-10 sm:py-12">
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex items-start justify-between gap-4 mb-8">
+        <div className="min-w-0">
           <p className="eyebrow mb-2">Your Account</p>
-          <h1 className="font-serif-display text-3xl text-ink">{email}</h1>
+          <h1 className="text-lg font-semibold text-ink truncate">{email}</h1>
         </div>
         <button
           onClick={logout}
-          className="flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-red-500 transition-colors"
+          className="shrink-0 flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-red-500 transition-colors py-1"
         >
           <LogOut size={16} />
           Sign Out
         </button>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6 rounded-lg border hairline p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Phone size={16} className="text-brand-blue" />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6 rounded-xl border hairline bg-surface p-5"
+      >
+        <div className="flex items-center gap-2.5 mb-1">
+          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-blue-tint shrink-0">
+            <Phone size={15} className="text-brand-blue" />
+          </span>
           <h2 className="text-sm font-semibold text-ink">Phone Number</h2>
         </div>
-        <p className="text-xs text-ink-muted mb-3">
+        <p className="text-xs text-ink-muted mb-4 ml-[42px]">
           Add and verify your number to get SMS updates about your assignments.
         </p>
         <PhoneVerify

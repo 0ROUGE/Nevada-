@@ -32,7 +32,7 @@ export default function ShareMenu({ dark = false }: { dark?: boolean }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-5"
+            className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-5 overflow-y-auto"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -41,7 +41,7 @@ export default function ShareMenu({ dark = false }: { dark?: boolean }) {
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-surface border hairline rounded-xl overflow-hidden relative"
+              className="w-full max-w-sm max-h-[85vh] overflow-x-hidden overflow-y-auto bg-surface border hairline rounded-xl relative my-auto"
             >
               <button
                 onClick={() => setOpen(false)}
@@ -50,7 +50,7 @@ export default function ShareMenu({ dark = false }: { dark?: boolean }) {
               >
                 <X size={16} />
               </button>
-              <img src="/share-image.png" alt="Essayz" className="w-full aspect-[1200/630] object-cover" />
+              <img src="/share-image.png" alt="Essayz" className="w-full h-40 sm:h-48 object-cover" />
               <div className="p-6">
                 <h2 className="font-serif-display text-lg text-ink mb-1">Share Essayz</h2>
                 <p className="text-sm text-ink-muted mb-4">
