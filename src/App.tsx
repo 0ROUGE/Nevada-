@@ -19,6 +19,7 @@ const Contact = lazy(() => import('./pages/Contact'))
 const Terms = lazy(() => import('./pages/Terms'))
 const Account = lazy(() => import('./pages/Account'))
 const AccountLogin = lazy(() => import('./pages/AccountLogin'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/terms" element={<PublicLayout><Terms /></PublicLayout>} />
           <Route path="/account" element={<PublicLayout><Account /></PublicLayout>} />
           <Route path="/account/login" element={<PublicLayout><AccountLogin /></PublicLayout>} />
+          <Route path="/reset-password" element={<PublicLayout><ResetPassword /></PublicLayout>} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
