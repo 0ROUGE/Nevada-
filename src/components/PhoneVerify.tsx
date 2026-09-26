@@ -29,6 +29,7 @@ export default function PhoneVerify({
   const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState('')
   const [otpKey, setOtpKey] = useState(0)
+  const [shakeKey, setShakeKey] = useState(0)
 
   async function sendCode() {
     if (channel === 'whatsapp') {
@@ -65,6 +66,8 @@ export default function PhoneVerify({
       setStage('idle')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Incorrect code')
+      setShakeKey((k) => k + 1)
+      setOtpKey((k) => k + 1)
     } finally {
       setVerifying(false)
     }
@@ -161,7 +164,7 @@ export default function PhoneVerify({
             <p className="text-xs text-ink-muted mb-4">
               {channel === 'email' ? emailAddress : `+254 ${value.slice(3)}`}
             </p>
-            <OtpInput key={otpKey} onComplete={verifyCode} disabled={verifying} />
+            <OtpInput key={otpKey} onComplete={verifyCode} disabled={verifying} shakeKey={shakeKey} />
             <div className="flex items-center justify-center gap-3 mt-4">
               {verifying && <span className="text-xs text-ink-muted">Verifying…</span>}
               <button type="button" onClick={sendCode} disabled={sending} className="text-xs text-brand-blue font-semibold underline disabled:opacity-60">

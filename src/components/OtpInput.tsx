@@ -1,14 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 
 export default function OtpInput({
   onComplete,
   disabled = false,
+  shakeKey = 0,
 }: {
   onComplete: (code: string) => void
   disabled?: boolean
+  /** Increment this from the parent whenever a submitted code was wrong, to trigger a shake. */
+  shakeKey?: number
 }) {
   const [digits, setDigits] = useState<string[]>(Array(6).fill(''))
+  const [pulseIndex, setPulseIndex] = useState<number | null>(null)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  // Auto-focus the first box as soon as it mounts
+  useEffect(() => {
+    inputRefs.current[0]?.focus()
+  }, [])
 
   // WebOTP: on supporting browsers (Chrome on Android), this auto-reads a code
   // from an incoming SMS without the user touching anything, as long as the SMS
@@ -45,6 +55,7 @@ export default function OtpInput({
     const next = [...digits]
     next[index] = clean[clean.length - 1]
     setDigits(next)
+    setPulseIndex(index)
     if (index < 5) inputRefs.current[index + 1]?.focus()
     if (next.every((d) => d !== '')) onComplete(next.join(''))
   }
@@ -67,12 +78,32 @@ export default function OtpInput({
   }
 
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+    <motion.div
+      className="flex gap-2 justify-center"
+      onPaste={handlePaste}
+      animate={shakeKey > 0 ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : {}}
+      transition={{ duration: 0.4 }}
+      key={shakeKey > 0 ? `shake-${shakeKey}` : 'still'}
+    >
       {digits.map((d, i) => (
-        <input
+        <motion.input
           key={i}
           ref={(el) => {
             inputRefs.current[i] = el
+          }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            scale: pulseIndex === i ? [1, 1.12, 1] : 1,
+          }}
+          transition={{
+            opacity: { duration: 0.25, delay: i * 0.04 },
+            y: { duration: 0.25, delay: i * 0.04 },
+            scale: { duration: 0.22 },
+          }}
+          onAnimationComplete={() => {
+            if (pulseIndex === i) setPulseIndex(null)
           }}
           value={d}
           disabled={disabled}
@@ -81,9 +112,11 @@ export default function OtpInput({
           inputMode="numeric"
           maxLength={1}
           autoComplete="one-time-code"
-          className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-semibold rounded-lg border hairline focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue transition-shadow disabled:opacity-50"
+          className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-semibold rounded-lg border-2 focus:outline-none transition-colors disabled:opacity-50 ${
+            d ? 'border-brand-blue bg-brand-blue-tint text-brand-blue' : 'hairline bg-surface'
+          } focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/15`}
         />
       ))}
-    </div>
+    </motion.div>
   )
 }
